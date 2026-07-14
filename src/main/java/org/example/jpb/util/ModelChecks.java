@@ -121,7 +121,7 @@ public final class ModelChecks {
 			throw new IllegalArgumentException(fieldName + " must not be empty");
 		}
 
-		return List.copyOf(values);
+		return new ArrayList<>(values);
 	}
 
 	public static <T> List<T> copyOfNullable(Collection<T> values) {

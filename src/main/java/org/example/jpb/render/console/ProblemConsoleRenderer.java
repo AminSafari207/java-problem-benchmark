@@ -148,7 +148,7 @@ public class ProblemConsoleRenderer {
 
 		renderBenchmarkHeader(result);
 
-		Console.section("Benchmark", ConsoleLayout.DEFAULT_WIDTH, 0);
+		Console.section("Benchmark", ConsoleLayout.BENCHMARK_WIDTH, 0);
 
 		if (result.isSkipped()) {
 			renderSkippedBenchmark(result);
@@ -162,7 +162,7 @@ public class ProblemConsoleRenderer {
 		Console.line();
 		Console.boxTitle(
 			"Benchmark For Problem: " + Console.blue(result.getProblemDisplayName()),
-			ConsoleLayout.DEFAULT_WIDTH
+			ConsoleLayout.BENCHMARK_WIDTH
 		);
 		Console.line();
 	}
@@ -191,10 +191,13 @@ public class ProblemConsoleRenderer {
 			Console.padRightTruncate("Samples", ConsoleLayout.BENCHMARK_SAMPLES_WIDTH) +
 			Console.padRightTruncate("Avg", ConsoleLayout.BENCHMARK_TIME_WIDTH) +
 			Console.padRightTruncate("Min", ConsoleLayout.BENCHMARK_TIME_WIDTH) +
+			Console.padRightTruncate("P50", ConsoleLayout.BENCHMARK_TIME_WIDTH) +
+			Console.padRightTruncate("P95", ConsoleLayout.BENCHMARK_TIME_WIDTH) +
+			Console.padRightTruncate("P99", ConsoleLayout.BENCHMARK_TIME_WIDTH) +
 			Console.padRightTruncate("Max", ConsoleLayout.BENCHMARK_TIME_WIDTH)
 		);
 
-		Console.divider('─', ConsoleLayout.DEFAULT_WIDTH);
+		Console.divider('─', ConsoleLayout.BENCHMARK_WIDTH);
 	}
 
 	private void renderBenchmarkRow(SolutionBenchmarkResult solution) {
@@ -235,13 +238,19 @@ public class ProblemConsoleRenderer {
 				ConsoleLayout.BENCHMARK_TIME_WIDTH
 			) +
 			Console.padRightTruncate(formatNanos(stats.getMinNanos()), ConsoleLayout.BENCHMARK_TIME_WIDTH) +
+			Console.padRightTruncate(
+				formatNanos(stats.getMedianNanos()),
+				ConsoleLayout.BENCHMARK_TIME_WIDTH
+			) +
+			Console.padRightTruncate(formatNanos(stats.getP95Nanos()), ConsoleLayout.BENCHMARK_TIME_WIDTH) +
+			Console.padRightTruncate(formatNanos(stats.getP99Nanos()), ConsoleLayout.BENCHMARK_TIME_WIDTH) +
 			Console.padRightTruncate(formatNanos(stats.getMaxNanos()), ConsoleLayout.BENCHMARK_TIME_WIDTH)
 		);
 	}
 
 	private int remainingBenchmarkErrorWidth() {
 		return (
-			ConsoleLayout.DEFAULT_WIDTH -
+			ConsoleLayout.BENCHMARK_WIDTH -
 			ConsoleLayout.BENCHMARK_STATUS_WIDTH -
 			ConsoleLayout.BENCHMARK_SOLUTION_WIDTH
 		);
