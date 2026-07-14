@@ -10,6 +10,8 @@ import org.example.jpb.util.ReflectionExecutor;
 
 public class BenchmarkRunner {
 
+	private static volatile Object resultSink;
+
 	public ProblemBenchmarkResult run(PreparedProblem preparedProblem, BenchmarkConfig config) {
 		List<PreparedSolution> preparedSolutions = preparedProblem.getSolutions();
 
@@ -107,7 +109,7 @@ public class BenchmarkRunner {
 			for (TestCase testCase : preparedCaseSet.getTestCases()) {
 				Object[] arguments = testCase.getDeepClonedArguments();
 
-				invoker.invoke(arguments);
+				resultSink = invoker.invoke(arguments);
 			}
 		}
 	}
