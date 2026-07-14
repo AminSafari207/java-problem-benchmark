@@ -87,29 +87,17 @@ public class BenchmarkRunner {
 		PreparedSolution preparedSolution,
 		int measurementIterations
 	) {
-		long totalNanos = 0L;
-		long minNanos = Long.MAX_VALUE;
-		long maxNanos = Long.MIN_VALUE;
+		List<Long> samplesNanos = new ArrayList<>(measurementIterations);
 
 		for (int i = 0; i < measurementIterations; i++) {
 			long startNanos = System.nanoTime();
 
 			runAllCases(preparedProblem, preparedSolution);
 
-			long elapsedNanos = System.nanoTime() - startNanos;
-
-			totalNanos += elapsedNanos;
-			minNanos = Math.min(minNanos, elapsedNanos);
-			maxNanos = Math.max(maxNanos, elapsedNanos);
+			samplesNanos.add(System.nanoTime() - startNanos);
 		}
 
-		return BenchmarkStats
-			.builder()
-			.sampleCount(measurementIterations)
-			.totalNanos(totalNanos)
-			.minNanos(minNanos)
-			.maxNanos(maxNanos)
-			.build();
+		return BenchmarkStats.of(samplesNanos);
 	}
 
 	private void runAllCases(PreparedProblem preparedProblem, PreparedSolution preparedSolution) {
