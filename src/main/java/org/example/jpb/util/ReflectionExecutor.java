@@ -2,6 +2,7 @@ package org.example.jpb.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.example.jpb.core.model.SolutionInvoker;
 
 public final class ReflectionExecutor {
 
@@ -11,7 +12,9 @@ public final class ReflectionExecutor {
 
 	public static Object invoke(Object instance, Method method, Object... args) {
 		try {
-			method.setAccessible(true);
+			if (!method.canAccess(instance)) {
+				method.setAccessible(true);
+			}
 
 			return method.invoke(instance, args);
 		} catch (InvocationTargetException e) {
@@ -29,5 +32,21 @@ public final class ReflectionExecutor {
 		} catch (ReflectiveOperationException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static SolutionInvoker createInvoker(Object instance, Method method) {
+		if (instance == null) {
+			throw new IllegalArgumentException("instance must not be null");
+		}
+
+		if (method == null) {
+			throw new IllegalArgumentException("method must not be null");
+		}
+
+		if (!method.canAccess(instance)) {
+			method.setAccessible(true);
+		}
+
+		return arguments -> invoke(instance, method, arguments);
 	}
 }

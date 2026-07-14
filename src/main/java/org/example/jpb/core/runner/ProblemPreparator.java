@@ -24,7 +24,7 @@ public class ProblemPreparator {
 		ProblemContract contract = readContract(problemClass);
 
 		List<PreparedCaseSet> caseSets = resolveCaseSets(problemClass, problemInstance);
-		List<PreparedSolution> solutions = resolveSolutions(problemClass);
+		List<PreparedSolution> solutions = resolveSolutions(problemClass, problemInstance);
 
 		validateArtifacts(problemClass, contract, caseSets, solutions);
 
@@ -165,23 +165,21 @@ public class ProblemPreparator {
 		);
 	}
 
-	private List<PreparedSolution> resolveSolutions(Class<?> problemClass) {
-		List<PreparedSolution> solutions = collectSolutions(problemClass);
+	private List<PreparedSolution> resolveSolutions(Class<?> problemClass, Object problemInstance) {
+		List<PreparedSolution> solutions = collectSolutions(problemClass, problemInstance);
 
 		ModelChecks.requireUniqueIds(solutions, PreparedSolution::getId, "solutionResults");
 
 		return solutions;
 	}
 
-	private List<PreparedSolution> collectSolutions(Class<?> problemClass) {
+	private List<PreparedSolution> collectSolutions(Class<?> problemClass, Object problemInstance) {
 		List<PreparedSolution> solutions = new ArrayList<>();
 
 		for (Method method : problemClass.getDeclaredMethods()) {
 			Solution solution = method.getAnnotation(Solution.class);
 
 			if (solution == null) continue;
-
-			//
 
 			method.setAccessible(true);
 			solutions.add(
@@ -190,6 +188,7 @@ public class ProblemPreparator {
 					.id(solution.id())
 					.displayName(solution.displayName())
 					.solutionMethod(method)
+					.invoker(ReflectionExecutor.createInvoker(problemInstance, method))
 					.build()
 			);
 		}

@@ -101,14 +101,13 @@ public class BenchmarkRunner {
 	}
 
 	private void runAllCases(PreparedProblem preparedProblem, PreparedSolution preparedSolution) {
-		Method method = preparedSolution.getSolutionMethod();
-		Object instance = preparedProblem.getProblemInstance();
+		SolutionInvoker invoker = preparedSolution.getInvoker();
 
 		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
 			for (TestCase testCase : preparedCaseSet.getTestCases()) {
 				Object[] arguments = testCase.getDeepClonedArguments();
 
-				ReflectionExecutor.invoke(instance, method, arguments);
+				invoker.invoke(arguments);
 			}
 		}
 	}

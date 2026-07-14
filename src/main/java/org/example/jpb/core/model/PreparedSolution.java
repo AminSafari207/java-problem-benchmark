@@ -12,9 +12,10 @@ public class PreparedSolution {
 	private final String id;
 	private final String displayName;
 	private final Method solutionMethod;
+	private final SolutionInvoker invoker;
 
 	@Builder
-	public PreparedSolution(String id, String displayName, Method solutionMethod) {
+	public PreparedSolution(String id, String displayName, Method solutionMethod, SolutionInvoker invoker) {
 		this.id =
 			ModelChecks.requireNormalizedNonBlankLengthBetween(
 				id,
@@ -31,5 +32,6 @@ public class PreparedSolution {
 				"displayName"
 			);
 		this.solutionMethod = ModelChecks.requireNonNull(solutionMethod, "solutionMethod");
+		this.invoker = ModelChecks.requireNonNull(invoker, "invoker");
 	}
 }
