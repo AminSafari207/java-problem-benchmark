@@ -1,12 +1,9 @@
 package org.example.jpb.core.benchmark;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.jpb.core.enums.BenchmarkStatus;
 import org.example.jpb.core.model.*;
-import org.example.jpb.util.ModelChecks;
-import org.example.jpb.util.ReflectionExecutor;
 
 public class BenchmarkRunner {
 
@@ -80,7 +77,9 @@ public class BenchmarkRunner {
 		int warmupIterations
 	) {
 		for (int i = 0; i < warmupIterations; i++) {
-			runAllCases(preparedProblem, preparedSolution);
+			Object[][] argumentsByCase = cloneAllArguments(preparedProblem);
+
+			runAllCases(preparedSolution, argumentsByCase);
 		}
 	}
 
@@ -92,9 +91,11 @@ public class BenchmarkRunner {
 		List<Long> samplesNanos = new ArrayList<>(measurementIterations);
 
 		for (int i = 0; i < measurementIterations; i++) {
+			Object[][] argumentsByCase = cloneAllArguments(preparedProblem);
+
 			long startNanos = System.nanoTime();
 
-			runAllCases(preparedProblem, preparedSolution);
+			runAllCases(preparedSolution, argumentsByCase);
 
 			samplesNanos.add(System.nanoTime() - startNanos);
 		}
@@ -102,15 +103,11 @@ public class BenchmarkRunner {
 		return BenchmarkStats.of(samplesNanos);
 	}
 
-	private void runAllCases(PreparedProblem preparedProblem, PreparedSolution preparedSolution) {
+	private void runAllCases(PreparedSolution preparedSolution, Object[][] argumentsByCase) {
 		SolutionInvoker invoker = preparedSolution.getInvoker();
 
-		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
-			for (TestCase testCase : preparedCaseSet.getTestCases()) {
-				Object[] arguments = testCase.getDeepClonedArguments();
-
-				resultSink = invoker.invoke(arguments);
-			}
+		for (Object[] arguments : argumentsByCase) {
+			resultSink = invoker.invoke(arguments);
 		}
 	}
 
@@ -152,5 +149,28 @@ public class BenchmarkRunner {
 		if (config.getMeasurementIterations() <= 0) {
 			throw new IllegalArgumentException("measurementIterations must be greater than zero");
 		}
+	}
+
+	//#################################
+	//## Helpers ######################
+	//#################################
+
+	private Object[][] cloneAllArguments(PreparedProblem preparedProblem) {
+		int testCaseCount = 0;
+
+		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
+			testCaseCount = Math.addExact(testCaseCount, preparedCaseSet.getTestCases().size());
+		}
+
+		Object[][] argumentsByCase = new Object[testCaseCount][];
+		int index = 0;
+
+		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
+			for (TestCase testCase : preparedCaseSet.getTestCases()) {
+				argumentsByCase[index++] = testCase.getDeepClonedArguments();
+			}
+		}
+
+		return argumentsByCase;
 	}
 }
