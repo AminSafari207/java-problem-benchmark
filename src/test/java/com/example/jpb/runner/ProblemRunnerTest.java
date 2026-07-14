@@ -7,6 +7,7 @@ import org.example.jpb.annotation.CaseSet;
 import org.example.jpb.annotation.Contract;
 import org.example.jpb.annotation.Problem;
 import org.example.jpb.annotation.Solution;
+import org.example.jpb.core.enums.BenchmarkStatus;
 import org.example.jpb.core.model.*;
 import org.example.jpb.core.runner.ProblemExecutor;
 import org.example.jpb.render.console.ProblemConsoleRenderer;
@@ -47,37 +48,29 @@ class ProblemRunnerTest {
 	}
 
 	@Test
-	void shouldRunAllCasesAndAllSolutionsWithoutThrowing() {
+	void shouldRunCorrectnessChecksAndBenchmarkOnlyPassingSolutions() {
 		BenchmarkConfig benchmarkConfig = BenchmarkConfig
 			.builder()
-			.warmupIterations(1_000_000)
-			.measurementIterations(1_000_000)
-			.build();
-
-		ConsoleRenderOptions consoleRenderOptions = ConsoleRenderOptions
-			.builder()
-			.showIds(true)
-			.showPassedCaseSets(true)
-			.showPassedTestCases(true)
-			.showBenchmark(true)
+			.warmupIterations(1)
+			.measurementIterations(1)
 			.build();
 
 		ProblemExecutor problemExecutor = new ProblemExecutor();
-		ProblemExecutionResult problemExecutionResult = problemExecutor.execute(
-			DummyProblem.class,
-			benchmarkConfig
-		);
+		ProblemExecutionResult executionResult = problemExecutor.execute(DummyProblem.class, benchmarkConfig);
 
-		ProblemResult problemResult = problemExecutionResult.getProblemResult();
-		ProblemBenchmarkResult problemBenchmarkResult = problemExecutionResult.getProblemBenchmarkResult();
-
-		ProblemConsoleRenderer renderer = new ProblemConsoleRenderer();
-
-		renderer.renderProblemResult(problemResult, consoleRenderOptions);
-		renderer.renderBenchmarkResult(problemBenchmarkResult, consoleRenderOptions);
+		ProblemResult problemResult = executionResult.getProblemResult();
+		ProblemBenchmarkResult benchmarkResult = executionResult.getProblemBenchmarkResult();
 
 		assertNotNull(problemResult);
 		assertEquals("Dummy", problemResult.getProblemDisplayName());
 		assertEquals(2, problemResult.getSolutionResults().size());
+
+		assertNotNull(benchmarkResult);
+		assertEquals(1, benchmarkResult.getSolutionBenchmarkResults().size());
+		assertEquals("add-one", benchmarkResult.getSolutionBenchmarkResults().getFirst().getSolutionId());
+		assertEquals(
+			BenchmarkStatus.SUCCESS,
+			benchmarkResult.getSolutionBenchmarkResults().getFirst().getStatus()
+		);
 	}
 }

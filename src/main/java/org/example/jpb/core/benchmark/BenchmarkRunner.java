@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.example.jpb.core.enums.BenchmarkStatus;
 import org.example.jpb.core.model.*;
+import org.example.jpb.util.ModelChecks;
 import org.example.jpb.util.ReflectionExecutor;
 
 public class BenchmarkRunner {
@@ -112,10 +113,10 @@ public class BenchmarkRunner {
 	}
 
 	private void runAllCases(PreparedProblem preparedProblem, PreparedSolution preparedSolution) {
-		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
-			Method method = preparedSolution.getSolutionMethod();
-			Object instance = preparedProblem.getProblemInstance();
+		Method method = preparedSolution.getSolutionMethod();
+		Object instance = preparedProblem.getProblemInstance();
 
+		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
 			for (TestCase testCase : preparedCaseSet.getTestCases()) {
 				Object[] arguments = testCase.getDeepClonedArguments();
 
@@ -153,6 +154,14 @@ public class BenchmarkRunner {
 
 		if (config == null) {
 			throw new IllegalArgumentException("config must not be null");
+		}
+
+		if (config.getWarmupIterations() < 0) {
+			throw new IllegalArgumentException("warmupIterations must not be negative");
+		}
+
+		if (config.getMeasurementIterations() <= 0) {
+			throw new IllegalArgumentException("measurementIterations must be greater than zero");
 		}
 	}
 }
