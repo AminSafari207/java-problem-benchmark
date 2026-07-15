@@ -1,7 +1,14 @@
 package org.example.jpb.render.console;
 
 import java.util.Arrays;
-import org.example.jpb.core.model.*;
+
+import org.example.jpb.core.benchmark.model.BenchmarkStats;
+import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
+import org.example.jpb.core.benchmark.model.SolutionBenchmarkResult;
+import org.example.jpb.core.runner.model.CaseSetResult;
+import org.example.jpb.core.runner.model.ProblemResult;
+import org.example.jpb.core.runner.model.SolutionResult;
+import org.example.jpb.core.runner.model.TestCaseResult;
 import org.example.jpb.render.constants.ConsoleLayout;
 import org.example.jpb.render.model.ConsoleRenderOptions;
 import org.example.jpb.util.Console;

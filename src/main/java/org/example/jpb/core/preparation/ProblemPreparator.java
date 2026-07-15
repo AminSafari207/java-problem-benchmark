@@ -1,8 +1,7 @@
-package org.example.jpb.core.runner;
+package org.example.jpb.core.preparation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -10,7 +9,11 @@ import org.example.jpb.annotation.CaseSet;
 import org.example.jpb.annotation.Contract;
 import org.example.jpb.annotation.Problem;
 import org.example.jpb.annotation.Solution;
-import org.example.jpb.core.model.*;
+import org.example.jpb.core.preparation.model.PreparedCaseSet;
+import org.example.jpb.core.preparation.model.PreparedProblem;
+import org.example.jpb.core.preparation.model.PreparedSolution;
+import org.example.jpb.core.preparation.model.PreparedContract;
+import org.example.jpb.core.shared.model.TestCase;
 import org.example.jpb.util.ModelChecks;
 import org.example.jpb.util.ReflectionExecutor;
 
@@ -21,7 +24,7 @@ public class ProblemPreparator {
 
 		Problem problem = problemClass.getAnnotation(Problem.class);
 		Object problemInstance = instantiate(problemClass);
-		ProblemContract contract = readContract(problemClass);
+		PreparedContract contract = readContract(problemClass);
 
 		List<PreparedCaseSet> caseSets = resolveCaseSets(problemClass, problemInstance);
 		List<PreparedSolution> solutions = resolveSolutions(problemClass, problemInstance);
@@ -58,7 +61,7 @@ public class ProblemPreparator {
 		}
 	}
 
-	private ProblemContract readContract(Class<?> problemClass) {
+	private PreparedContract readContract(Class<?> problemClass) {
 		Contract contract = problemClass.getAnnotation(Contract.class);
 
 		if (contract == null) {
@@ -67,7 +70,7 @@ public class ProblemPreparator {
 			);
 		}
 
-		return ProblemContract.of(contract.accepts(), contract.expects());
+		return PreparedContract.of(contract.accepts(), contract.expects());
 	}
 
 	private List<PreparedCaseSet> resolveCaseSets(Class<?> problemClass, Object problemInstance) {
@@ -218,7 +221,7 @@ public class ProblemPreparator {
 
 	private void validateArtifacts(
 		Class<?> problemClass,
-		ProblemContract contract,
+		PreparedContract contract,
 		List<PreparedCaseSet> caseSets,
 		List<PreparedSolution> solutions
 	) {
@@ -240,7 +243,7 @@ public class ProblemPreparator {
 
 	private void validateCaseSets(
 		Class<?> problemClass,
-		ProblemContract contract,
+		PreparedContract contract,
 		List<PreparedCaseSet> caseSets
 	) {
 		for (PreparedCaseSet caseSet : caseSets) {
@@ -250,7 +253,7 @@ public class ProblemPreparator {
 
 	private void validateTestCases(
 		Class<?> problemClass,
-		ProblemContract contract,
+		PreparedContract contract,
 		List<TestCase> testCases,
 		String caseSetDisplayName
 	) {
@@ -313,7 +316,7 @@ public class ProblemPreparator {
 
 	private void validateSolutions(
 		Class<?> problemClass,
-		ProblemContract contract,
+		PreparedContract contract,
 		List<PreparedSolution> solutions
 	) {
 		for (PreparedSolution solution : solutions) {
@@ -323,7 +326,7 @@ public class ProblemPreparator {
 
 	private void validateSolutionSignature(
 		Class<?> problemClass,
-		ProblemContract contract,
+		PreparedContract contract,
 		Method solutionMethod
 	) {
 		Class<?>[] actualParams = solutionMethod.getParameterTypes();

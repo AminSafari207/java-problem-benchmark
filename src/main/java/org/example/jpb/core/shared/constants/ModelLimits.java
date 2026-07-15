@@ -1,4 +1,4 @@
-package org.example.jpb.core.constants;
+package org.example.jpb.core.shared.constants;
 
 public final class ModelLimits {
 

@@ -50,7 +50,7 @@ mvn test
 Or run `Main` directly:
 
 ```bash
-mvn compile && java -cp target/classes org.example.jpb.Main
+mvn compile && java -cp target/classes org.example.jpb.App
 ```
 
 ---

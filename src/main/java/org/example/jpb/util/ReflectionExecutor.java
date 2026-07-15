@@ -2,7 +2,7 @@ package org.example.jpb.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.example.jpb.core.model.SolutionInvoker;
+import org.example.jpb.core.preparation.model.SolutionInvoker;
 
 public final class ReflectionExecutor {
 

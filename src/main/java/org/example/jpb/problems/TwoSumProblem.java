@@ -7,8 +7,8 @@ import org.example.jpb.annotation.CaseSet;
 import org.example.jpb.annotation.Contract;
 import org.example.jpb.annotation.Problem;
 import org.example.jpb.annotation.Solution;
-import org.example.jpb.core.model.Arguments;
-import org.example.jpb.core.model.TestCase;
+import org.example.jpb.core.shared.model.Arguments;
+import org.example.jpb.core.shared.model.TestCase;
 
 @Problem(id = "two-sum", displayName = "Two Sum")
 @Contract(accepts = { int[].class, Integer.class }, expects = int[].class)

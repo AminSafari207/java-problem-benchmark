@@ -7,11 +7,14 @@ import org.example.jpb.annotation.CaseSet;
 import org.example.jpb.annotation.Contract;
 import org.example.jpb.annotation.Problem;
 import org.example.jpb.annotation.Solution;
-import org.example.jpb.core.enums.BenchmarkStatus;
-import org.example.jpb.core.model.*;
-import org.example.jpb.core.runner.ProblemExecutor;
-import org.example.jpb.render.console.ProblemConsoleRenderer;
-import org.example.jpb.render.model.ConsoleRenderOptions;
+import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
+import org.example.jpb.core.benchmark.model.BenchmarkConfig;
+import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
+import org.example.jpb.core.execution.model.ProblemExecutionResult;
+import org.example.jpb.core.execution.ProblemExecutor;
+import org.example.jpb.core.runner.model.ProblemResult;
+import org.example.jpb.core.shared.model.Arguments;
+import org.example.jpb.core.shared.model.TestCase;
 import org.junit.jupiter.api.Test;
 
 class ProblemRunnerTest {

@@ -2,8 +2,16 @@ package org.example.jpb.core.benchmark;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.example.jpb.core.enums.BenchmarkStatus;
-import org.example.jpb.core.model.*;
+import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
+import org.example.jpb.core.benchmark.model.BenchmarkConfig;
+import org.example.jpb.core.benchmark.model.BenchmarkStats;
+import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
+import org.example.jpb.core.benchmark.model.SolutionBenchmarkResult;
+import org.example.jpb.core.preparation.model.PreparedCaseSet;
+import org.example.jpb.core.preparation.model.PreparedProblem;
+import org.example.jpb.core.preparation.model.PreparedSolution;
+import org.example.jpb.core.preparation.model.SolutionInvoker;
+import org.example.jpb.core.shared.model.TestCase;
 
 public class BenchmarkRunner {
 

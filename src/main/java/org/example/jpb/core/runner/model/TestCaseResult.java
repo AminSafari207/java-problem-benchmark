@@ -1,8 +1,8 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.runner.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.example.jpb.core.constants.ModelLimits;
+import org.example.jpb.core.shared.constants.ModelLimits;
 import org.example.jpb.util.ModelChecks;
 
 @Getter

@@ -1,9 +1,9 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.preparation.model;
 
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
-import org.example.jpb.core.constants.ModelLimits;
+import org.example.jpb.core.shared.constants.ModelLimits;
 import org.example.jpb.util.ModelChecks;
 
 @Getter
@@ -13,7 +13,7 @@ public class PreparedProblem {
 	private final String displayName;
 	private final Class<?> problemClass;
 	private final Object problemInstance;
-	private final ProblemContract contract;
+	private final PreparedContract contract;
 	private final List<PreparedCaseSet> caseSets;
 	private final List<PreparedSolution> solutions;
 
@@ -23,7 +23,7 @@ public class PreparedProblem {
 		String displayName,
 		Class<?> problemClass,
 		Object problemInstance,
-		ProblemContract contract,
+		PreparedContract contract,
 		List<PreparedCaseSet> caseSets,
 		List<PreparedSolution> solutions
 	) {

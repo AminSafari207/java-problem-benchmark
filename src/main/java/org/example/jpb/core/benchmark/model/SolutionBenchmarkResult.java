@@ -1,9 +1,9 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.benchmark.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.example.jpb.core.constants.ModelLimits;
-import org.example.jpb.core.enums.BenchmarkStatus;
+import org.example.jpb.core.shared.constants.ModelLimits;
+import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.util.ModelChecks;
 
 @Getter

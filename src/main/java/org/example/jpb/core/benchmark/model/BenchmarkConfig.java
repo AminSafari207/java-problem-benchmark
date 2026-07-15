@@ -1,4 +1,4 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.benchmark.model;
 
 import lombok.Builder;
 import lombok.Getter;

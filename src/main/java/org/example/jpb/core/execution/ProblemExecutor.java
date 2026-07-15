@@ -1,10 +1,18 @@
-package org.example.jpb.core.runner;
+package org.example.jpb.core.execution;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.example.jpb.core.benchmark.BenchmarkRunner;
-import org.example.jpb.core.model.*;
+import org.example.jpb.core.benchmark.model.BenchmarkConfig;
+import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
+import org.example.jpb.core.execution.model.ProblemExecutionResult;
+import org.example.jpb.core.preparation.model.PreparedProblem;
+import org.example.jpb.core.preparation.model.PreparedSolution;
+import org.example.jpb.core.preparation.ProblemPreparator;
+import org.example.jpb.core.runner.ProblemRunner;
+import org.example.jpb.core.runner.model.ProblemResult;
+import org.example.jpb.core.runner.model.SolutionResult;
 
 public class ProblemExecutor {
 

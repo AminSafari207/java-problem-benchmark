@@ -1,4 +1,4 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.shared.model;
 
 public final class Arguments {
 

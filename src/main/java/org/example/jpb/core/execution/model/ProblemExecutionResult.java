@@ -1,7 +1,9 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.execution.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
+import org.example.jpb.core.runner.model.ProblemResult;
 import org.example.jpb.util.ModelChecks;
 
 @Getter

@@ -1,9 +1,9 @@
-package org.example.jpb.core.model;
+package org.example.jpb.core.benchmark.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import lombok.Builder;
+
 import lombok.Getter;
 import org.example.jpb.util.ModelChecks;
 

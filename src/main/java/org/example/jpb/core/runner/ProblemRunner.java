@@ -2,7 +2,16 @@ package org.example.jpb.core.runner;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.example.jpb.core.model.*;
+
+import org.example.jpb.core.preparation.model.PreparedCaseSet;
+import org.example.jpb.core.preparation.model.PreparedProblem;
+import org.example.jpb.core.preparation.model.PreparedSolution;
+import org.example.jpb.core.preparation.ProblemPreparator;
+import org.example.jpb.core.runner.model.CaseSetResult;
+import org.example.jpb.core.runner.model.ProblemResult;
+import org.example.jpb.core.runner.model.SolutionResult;
+import org.example.jpb.core.runner.model.TestCaseResult;
+import org.example.jpb.core.shared.model.TestCase;
 import org.example.jpb.util.ReflectionExecutor;
 import org.example.jpb.util.ResultComparator;
 
