@@ -9,6 +9,16 @@ public final class ModelChecks {
 		throw new AssertionError("No instances");
 	}
 
+	public static String requireNonBlank(String value, String fieldName) {
+		requireNonNull(value, fieldName);
+
+		if (value.isBlank()) {
+			throw new IllegalArgumentException(fieldName + " must not be blank");
+		}
+
+		return value;
+	}
+
 	public static String requireNormalizedNonBlank(String value, String fieldName) {
 		requireNonNull(value, fieldName);
 
@@ -28,6 +38,10 @@ public final class ModelChecks {
 	}
 
 	public static int defaultIfNull(Integer value, int defaultValue) {
+		return value != null ? value : defaultValue;
+	}
+
+	public static long defaultIfNull(Long value, long defaultValue) {
 		return value != null ? value : defaultValue;
 	}
 
@@ -114,6 +128,26 @@ public final class ModelChecks {
 		}
 	}
 
+	public static int requireInRange(int value, int min, int max, String fieldName) {
+		if (value < min || value > max) {
+			throw new IllegalArgumentException(
+				fieldName + " must be between " + min + " and " + max + ", got: " + value
+			);
+		}
+
+		return value;
+	}
+
+	public static long requireInRange(long value, long min, long max, String fieldName) {
+		if (value < min || value > max) {
+			throw new IllegalArgumentException(
+				fieldName + " must be between " + min + " and " + max + ", got: " + value
+			);
+		}
+
+		return value;
+	}
+
 	public static <T> List<T> requireNonEmptyCopy(Collection<T> values, String fieldName) {
 		requireNonNull(values, fieldName);
 
@@ -131,27 +165,6 @@ public final class ModelChecks {
 	public static <T> List<T> requireCopy(Collection<T> values, String fieldName) {
 		requireNonNull(values, fieldName);
 		return List.copyOf(values);
-	}
-
-	public static void requireLessThanOrEqual(long min, long max, String minFieldName, String maxFieldName) {
-		if (min > max) {
-			throw new IllegalArgumentException(
-				minFieldName + " must be less than or equal to " + maxFieldName
-			);
-		}
-	}
-
-	public static void requireLessThanOrEqual(
-		double min,
-		double max,
-		String minFieldName,
-		String maxFieldName
-	) {
-		if (min > max) {
-			throw new IllegalArgumentException(
-				minFieldName + " must be less than or equal to " + maxFieldName
-			);
-		}
 	}
 
 	public static <T> void requireUniqueIds(

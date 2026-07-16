@@ -2,8 +2,8 @@ package org.example.jpb.core.benchmark.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.example.jpb.core.shared.constants.ModelLimits;
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
+import org.example.jpb.core.shared.constants.ModelLimits;
 import org.example.jpb.util.ModelChecks;
 
 @Getter
@@ -41,6 +41,18 @@ public class SolutionBenchmarkResult {
 		this.status = ModelChecks.requireNonNull(status, "status");
 		this.stats = stats;
 		this.errorMessage = errorMessage;
+
+		validateConsistency();
+	}
+
+	private void validateConsistency() {
+		if (status == BenchmarkStatus.SUCCESS) {
+			ModelChecks.requireNonNull(stats, "stats");
+		}
+
+		if (status == BenchmarkStatus.FAILED) {
+			ModelChecks.requireNonBlank(errorMessage, "errorMessage");
+		}
 	}
 
 	public boolean isSuccess() {

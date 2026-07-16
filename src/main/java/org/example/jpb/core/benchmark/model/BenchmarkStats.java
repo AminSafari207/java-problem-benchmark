@@ -1,9 +1,9 @@
 package org.example.jpb.core.benchmark.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import lombok.Getter;
 import org.example.jpb.util.ModelChecks;
 
@@ -50,6 +50,7 @@ public class BenchmarkStats {
 		return new BenchmarkStats(samplesNanos);
 	}
 
+	@JsonIgnore
 	public double getAverageNanos() {
 		return sampleCount == 0 ? 0.0d : (double) totalNanos / sampleCount;
 	}

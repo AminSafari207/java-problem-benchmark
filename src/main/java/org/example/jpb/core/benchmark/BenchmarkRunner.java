@@ -3,10 +3,7 @@ package org.example.jpb.core.benchmark;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
-import org.example.jpb.core.benchmark.model.BenchmarkConfig;
-import org.example.jpb.core.benchmark.model.BenchmarkStats;
-import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
-import org.example.jpb.core.benchmark.model.SolutionBenchmarkResult;
+import org.example.jpb.core.benchmark.model.*;
 import org.example.jpb.core.preparation.model.PreparedCaseSet;
 import org.example.jpb.core.preparation.model.PreparedProblem;
 import org.example.jpb.core.preparation.model.PreparedSolution;
@@ -22,12 +19,20 @@ public class BenchmarkRunner {
 
 		validateInputs(preparedProblem, preparedSolutions, config);
 
+		if (config.getForkCount() == 0) {
+			return runInProcess(preparedProblem, config);
+		}
+
+		return runForked(preparedProblem, config);
+	}
+
+	private ProblemBenchmarkResult runInProcess(PreparedProblem preparedProblem, BenchmarkConfig config) {
 		int warmupIterations = config.getWarmupIterations();
 		int measurementIterations = config.getMeasurementIterations();
 
 		List<SolutionBenchmarkResult> solutionsBenchmarkResults = new ArrayList<>();
 
-		for (PreparedSolution preparedSolution : preparedSolutions) {
+		for (PreparedSolution preparedSolution : preparedProblem.getSolutions()) {
 			SolutionBenchmarkResult benchmarkResult = benchmarkSolution(
 				preparedProblem,
 				preparedSolution,
@@ -44,6 +49,54 @@ public class BenchmarkRunner {
 			.problemDisplayName(preparedProblem.getDisplayName())
 			.solutionBenchmarkResults(solutionsBenchmarkResults)
 			.build();
+	}
+
+	public SolutionBenchmarkResult runSingleSolutionInProcess(
+		PreparedProblem preparedProblem,
+		PreparedSolution preparedSolution,
+		BenchmarkConfig config
+	) {
+		validateInputs(preparedProblem, List.of(preparedSolution), config);
+
+		if (config.getForkCount() != 0) {
+			throw new IllegalArgumentException(
+				"Fork worker requires BenchmarkConfig with forkCount equal to zero"
+			);
+		}
+
+		return benchmarkSolution(
+			preparedProblem,
+			preparedSolution,
+			config.getWarmupIterations(),
+			config.getMeasurementIterations()
+		);
+	}
+
+	private ProblemBenchmarkResult runForked(PreparedProblem preparedProblem, BenchmarkConfig config) {
+		ForkBenchmarkRunner runner = new ForkBenchmarkRunner();
+
+		List<SolutionBenchmarkResult> solutionsBenchmarkResults = new ArrayList<>();
+
+		for (PreparedSolution preparedSolution : preparedProblem.getSolutions()) {
+			List<ForkBenchmarkResult> forkResults = runner.run(preparedProblem, preparedSolution, config);
+			SolutionBenchmarkResult benchmarkResult = aggregateForkResults(preparedSolution, forkResults);
+
+			solutionsBenchmarkResults.add(benchmarkResult);
+		}
+
+		return ProblemBenchmarkResult
+			.builder()
+			.problemId(preparedProblem.getId())
+			.problemDisplayName(preparedProblem.getDisplayName())
+			.solutionBenchmarkResults(solutionsBenchmarkResults)
+			.build();
+	}
+
+	private SolutionBenchmarkResult aggregateForkResults(
+		PreparedSolution preparedSolution,
+		List<ForkBenchmarkResult> forkResults
+	) {
+		throw new UnsupportedOperationException("Fork result aggregation is not implemented yet");
 	}
 
 	private SolutionBenchmarkResult benchmarkSolution(

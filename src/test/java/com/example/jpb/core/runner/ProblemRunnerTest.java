@@ -1,4 +1,4 @@
-package com.example.jpb.runner;
+package com.example.jpb.core.runner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,8 +10,8 @@ import org.example.jpb.annotation.Solution;
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.core.benchmark.model.BenchmarkConfig;
 import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
-import org.example.jpb.core.execution.model.ProblemExecutionResult;
 import org.example.jpb.core.execution.ProblemExecutor;
+import org.example.jpb.core.execution.model.ProblemExecutionResult;
 import org.example.jpb.core.runner.model.ProblemResult;
 import org.example.jpb.core.shared.model.Arguments;
 import org.example.jpb.core.shared.model.TestCase;
@@ -56,6 +56,7 @@ class ProblemRunnerTest {
 			.builder()
 			.warmupIterations(1)
 			.measurementIterations(1)
+			.forkCount(0)
 			.build();
 
 		ProblemExecutor problemExecutor = new ProblemExecutor();

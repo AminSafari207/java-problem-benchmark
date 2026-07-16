@@ -8,8 +8,6 @@ public final class ModelLimits {
 	public static final int DISPLAY_NAME_MIN_LENGTH = 1;
 	public static final int DISPLAY_NAME_MAX_LENGTH = 120;
 
-	public static final int DESCRIPTION_MAX_LENGTH = 2_000;
-
 	private ModelLimits() {
 		throw new AssertionError("No instances");
 	}

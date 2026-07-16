@@ -2,8 +2,8 @@ package org.example.jpb;
 
 import org.example.jpb.core.benchmark.model.BenchmarkConfig;
 import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
-import org.example.jpb.core.execution.model.ProblemExecutionResult;
 import org.example.jpb.core.execution.ProblemExecutor;
+import org.example.jpb.core.execution.model.ProblemExecutionResult;
 import org.example.jpb.core.runner.model.ProblemResult;
 import org.example.jpb.problems.TwoSumProblem;
 import org.example.jpb.render.console.ProblemConsoleRenderer;
