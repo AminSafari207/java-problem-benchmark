@@ -2,11 +2,10 @@ package org.example.jpb.core.runner;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.example.jpb.core.preparation.ProblemPreparator;
 import org.example.jpb.core.preparation.model.PreparedCaseSet;
 import org.example.jpb.core.preparation.model.PreparedProblem;
 import org.example.jpb.core.preparation.model.PreparedSolution;
-import org.example.jpb.core.preparation.ProblemPreparator;
 import org.example.jpb.core.runner.model.CaseSetResult;
 import org.example.jpb.core.runner.model.ProblemResult;
 import org.example.jpb.core.runner.model.SolutionResult;
@@ -45,8 +44,7 @@ public class ProblemRunner {
 			solutionResults.add(result);
 		}
 
-		return ProblemResult
-			.builder()
+		return ProblemResult.builder()
 			.problemId(preparedProblem.getId())
 			.problemDisplayName(preparedProblem.getDisplayName())
 			.solutionResults(solutionResults)
@@ -67,28 +65,29 @@ public class ProblemRunner {
 				Object actual;
 
 				try {
-					actual =
-						ReflectionExecutor.invoke(
-							instance,
-							preparedSolution.getSolutionMethod(),
-							testCase.getDeepClonedArguments()
-						);
+					actual = ReflectionExecutor.invoke(
+						instance,
+						preparedSolution.getSolutionMethod(),
+						testCase.getDeepClonedArguments()
+					);
 				} catch (RuntimeException e) {
 					throw new RuntimeException(
 						"Execution failed: @Solution method '" +
-						preparedSolution.getDisplayName() +
-						"' failed for test case '" +
-						testCase.getDisplayName() +
-						"'",
+							preparedSolution.getDisplayName() +
+							"' failed for test case '" +
+							testCase.getDisplayName() +
+							"'",
 						e
 					);
 				}
 
-				boolean passed = ResultComparator.areEqual(testCase.getExpected(), actual);
+				boolean passed = ResultComparator.areEqual(
+					testCase.getExpected(),
+					actual
+				);
 
 				testCaseResults.add(
-					TestCaseResult
-						.builder()
+					TestCaseResult.builder()
 						.testCaseId(testCase.getId())
 						.testCaseDisplayName(testCase.getDisplayName())
 						.expected(testCase.getExpected())
@@ -99,8 +98,7 @@ public class ProblemRunner {
 			}
 
 			caseSetResults.add(
-				CaseSetResult
-					.builder()
+				CaseSetResult.builder()
 					.caseSetId(caseSet.getId())
 					.caseSetDisplayName(caseSet.getDisplayName())
 					.testCaseResults(testCaseResults)
@@ -108,8 +106,7 @@ public class ProblemRunner {
 			);
 		}
 
-		return SolutionResult
-			.builder()
+		return SolutionResult.builder()
 			.solutionId(preparedSolution.getId())
 			.solutionDisplayName(preparedSolution.getDisplayName())
 			.caseSetResults(caseSetResults)

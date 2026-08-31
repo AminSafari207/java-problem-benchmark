@@ -20,15 +20,24 @@ public class BenchmarkStats {
 	private final long p99Nanos;
 
 	private BenchmarkStats(List<Long> samplesNanos) {
-		this.samplesNanos = ModelChecks.requireNonEmptyCopy(samplesNanos, "samplesNanos");
+		this.samplesNanos = ModelChecks.requireNonEmptyCopy(
+			samplesNanos,
+			"samplesNanos"
+		);
 
 		long calculatedTotalNanos = 0L;
 
 		for (int i = 0; i < this.samplesNanos.size(); i++) {
 			Long sampleNanos = this.samplesNanos.get(i);
 
-			ModelChecks.requireNonNull(sampleNanos, "samplesNanos element at index '" + i + "'");
-			ModelChecks.requireNonNegative(sampleNanos, "samplesNanos element at index '" + i + "'");
+			ModelChecks.requireNonNull(
+				sampleNanos,
+				"samplesNanos element at index '" + i + "'"
+			);
+			ModelChecks.requireNonNegative(
+				sampleNanos,
+				"samplesNanos element at index '" + i + "'"
+			);
 
 			calculatedTotalNanos = Math.addExact(calculatedTotalNanos, sampleNanos);
 		}

@@ -10,9 +10,9 @@ import org.example.jpb.annotation.Contract;
 import org.example.jpb.annotation.Problem;
 import org.example.jpb.annotation.Solution;
 import org.example.jpb.core.preparation.model.PreparedCaseSet;
+import org.example.jpb.core.preparation.model.PreparedContract;
 import org.example.jpb.core.preparation.model.PreparedProblem;
 import org.example.jpb.core.preparation.model.PreparedSolution;
-import org.example.jpb.core.preparation.model.PreparedContract;
 import org.example.jpb.core.shared.model.TestCase;
 import org.example.jpb.util.ModelChecks;
 import org.example.jpb.util.ReflectionExecutor;
@@ -26,13 +26,18 @@ public class ProblemPreparator {
 		Object problemInstance = instantiate(problemClass);
 		PreparedContract contract = readContract(problemClass);
 
-		List<PreparedCaseSet> caseSets = resolveCaseSets(problemClass, problemInstance);
-		List<PreparedSolution> solutions = resolveSolutions(problemClass, problemInstance);
+		List<PreparedCaseSet> caseSets = resolveCaseSets(
+			problemClass,
+			problemInstance
+		);
+		List<PreparedSolution> solutions = resolveSolutions(
+			problemClass,
+			problemInstance
+		);
 
 		validateArtifacts(problemClass, contract, caseSets, solutions);
 
-		return PreparedProblem
-			.builder()
+		return PreparedProblem.builder()
 			.id(problem.id())
 			.displayName(problem.displayName())
 			.problemClass(problemClass)
@@ -52,12 +57,15 @@ public class ProblemPreparator {
 		} catch (NoSuchMethodException e) {
 			throw new IllegalStateException(
 				"Invalid problem class: " +
-				problemClass.getName() +
-				" must declare an accessible no-argument constructor",
+					problemClass.getName() +
+					" must declare an accessible no-argument constructor",
 				e
 			);
 		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Failed to instantiate problem class: " + problemClass.getName(), e);
+			throw new RuntimeException(
+				"Failed to instantiate problem class: " + problemClass.getName(),
+				e
+			);
 		}
 	}
 
@@ -66,22 +74,33 @@ public class ProblemPreparator {
 
 		if (contract == null) {
 			throw new IllegalStateException(
-				"Problem class '" + problemClass.getName() + "' must declare a @Contract annotation"
+				"Problem class '" +
+					problemClass.getName() +
+					"' must declare a @Contract annotation"
 			);
 		}
 
 		return PreparedContract.of(contract.accepts(), contract.expects());
 	}
 
-	private List<PreparedCaseSet> resolveCaseSets(Class<?> problemClass, Object problemInstance) {
-		List<PreparedCaseSet> caseSets = collectCaseSets(problemClass, problemInstance);
+	private List<PreparedCaseSet> resolveCaseSets(
+		Class<?> problemClass,
+		Object problemInstance
+	) {
+		List<PreparedCaseSet> caseSets = collectCaseSets(
+			problemClass,
+			problemInstance
+		);
 
 		ModelChecks.requireUniqueIds(caseSets, PreparedCaseSet::getId, "caseSets");
 
 		return caseSets;
 	}
 
-	private List<PreparedCaseSet> collectCaseSets(Class<?> problemClass, Object problemInstance) {
+	private List<PreparedCaseSet> collectCaseSets(
+		Class<?> problemClass,
+		Object problemInstance
+	) {
 		List<PreparedCaseSet> caseSets = new ArrayList<>();
 
 		for (Method method : problemClass.getDeclaredMethods()) {
@@ -93,8 +112,7 @@ public class ProblemPreparator {
 			String source = "@CaseSete method " + method.getName();
 
 			caseSets.add(
-				PreparedCaseSet
-					.builder()
+				PreparedCaseSet.builder()
 					.id(caseSet.id())
 					.displayName(caseSet.displayName())
 					.testCases(extractTestCases(value, source))
@@ -114,8 +132,7 @@ public class ProblemPreparator {
 				String source = "@CaseSete field " + field.getName();
 
 				caseSets.add(
-					PreparedCaseSet
-						.builder()
+					PreparedCaseSet.builder()
 						.id(caseSet.id())
 						.displayName(caseSet.displayName())
 						.testCases(extractTestCases(value, source))
@@ -123,7 +140,10 @@ public class ProblemPreparator {
 				);
 			} catch (IllegalAccessException e) {
 				throw new RuntimeException(
-					"Failed to access @CaseSet field '" + field.getName() + "' in " + problemClass.getName(),
+					"Failed to access @CaseSet field '" +
+						field.getName() +
+						"' in " +
+						problemClass.getName(),
 					e
 				);
 			}
@@ -150,10 +170,10 @@ public class ProblemPreparator {
 				if (!(element instanceof TestCase testCase)) {
 					throw new IllegalStateException(
 						source +
-						" contains non-TestCase element at index " +
-						i +
-						": " +
-						describeValueType(element)
+							" contains non-TestCase element at index " +
+							i +
+							": " +
+							describeValueType(element)
 					);
 				}
 
@@ -164,19 +184,34 @@ public class ProblemPreparator {
 		}
 
 		throw new IllegalStateException(
-			source + " must produce TestCase or List<TestCase>, but got " + value.getClass().getName()
+			source +
+				" must produce TestCase or List<TestCase>, but got " +
+				value.getClass().getName()
 		);
 	}
 
-	private List<PreparedSolution> resolveSolutions(Class<?> problemClass, Object problemInstance) {
-		List<PreparedSolution> solutions = collectSolutions(problemClass, problemInstance);
+	private List<PreparedSolution> resolveSolutions(
+		Class<?> problemClass,
+		Object problemInstance
+	) {
+		List<PreparedSolution> solutions = collectSolutions(
+			problemClass,
+			problemInstance
+		);
 
-		ModelChecks.requireUniqueIds(solutions, PreparedSolution::getId, "solutionResults");
+		ModelChecks.requireUniqueIds(
+			solutions,
+			PreparedSolution::getId,
+			"solutionResults"
+		);
 
 		return solutions;
 	}
 
-	private List<PreparedSolution> collectSolutions(Class<?> problemClass, Object problemInstance) {
+	private List<PreparedSolution> collectSolutions(
+		Class<?> problemClass,
+		Object problemInstance
+	) {
 		List<PreparedSolution> solutions = new ArrayList<>();
 
 		for (Method method : problemClass.getDeclaredMethods()) {
@@ -186,8 +221,7 @@ public class ProblemPreparator {
 
 			method.setAccessible(true);
 			solutions.add(
-				PreparedSolution
-					.builder()
+				PreparedSolution.builder()
 					.id(solution.id())
 					.displayName(solution.displayName())
 					.solutionMethod(method)
@@ -214,7 +248,9 @@ public class ProblemPreparator {
 
 		if (!problemClass.isAnnotationPresent(Problem.class)) {
 			throw new IllegalArgumentException(
-				"Invalid problem class: " + problemClass.getName() + " is not annotated with @Problem"
+				"Invalid problem class: " +
+					problemClass.getName() +
+					" is not annotated with @Problem"
 			);
 		}
 	}
@@ -227,13 +263,15 @@ public class ProblemPreparator {
 	) {
 		if (caseSets.isEmpty()) {
 			throw new IllegalStateException(
-				"Invalid problem definition: no @Case found in " + problemClass.getName()
+				"Invalid problem definition: no @Case found in " +
+					problemClass.getName()
 			);
 		}
 
 		if (solutions.isEmpty()) {
 			throw new IllegalStateException(
-				"Invalid problem definition: no @Solution found in " + problemClass.getName()
+				"Invalid problem definition: no @Solution found in " +
+					problemClass.getName()
 			);
 		}
 
@@ -247,7 +285,12 @@ public class ProblemPreparator {
 		List<PreparedCaseSet> caseSets
 	) {
 		for (PreparedCaseSet caseSet : caseSets) {
-			validateTestCases(problemClass, contract, caseSet.getTestCases(), caseSet.getDisplayName());
+			validateTestCases(
+				problemClass,
+				contract,
+				caseSet.getTestCases(),
+				caseSet.getDisplayName()
+			);
 		}
 	}
 
@@ -266,15 +309,15 @@ public class ProblemPreparator {
 			if (args.length != expectedParams.length) {
 				throw new IllegalStateException(
 					"Test case '" +
-					testCase.getDisplayName() +
-					"' of case set '" +
-					caseSetDisplayName +
-					"' in " +
-					problemClass.getName() +
-					" has " +
-					args.length +
-					" argument(s), but contract requires " +
-					expectedParams.length
+						testCase.getDisplayName() +
+						"' of case set '" +
+						caseSetDisplayName +
+						"' in " +
+						problemClass.getName() +
+						" has " +
+						args.length +
+						" argument(s), but contract requires " +
+						expectedParams.length
 				);
 			}
 
@@ -282,17 +325,17 @@ public class ProblemPreparator {
 				if (!isValueCompatible(expectedParams[i], args[i])) {
 					throw new IllegalStateException(
 						"Test case '" +
-						testCase.getDisplayName() +
-						"' of case set '" +
-						caseSetDisplayName +
-						"' in " +
-						problemClass.getName() +
-						"' has incompatible argument at index " +
-						i +
-						": expected " +
-						expectedParams[i].getName() +
-						", but got " +
-						describeValueType(args[i])
+							testCase.getDisplayName() +
+							"' of case set '" +
+							caseSetDisplayName +
+							"' in " +
+							problemClass.getName() +
+							"' has incompatible argument at index " +
+							i +
+							": expected " +
+							expectedParams[i].getName() +
+							", but got " +
+							describeValueType(args[i])
 					);
 				}
 			}
@@ -300,15 +343,15 @@ public class ProblemPreparator {
 			if (!isValueCompatible(expectedReturnType, testCase.getExpected())) {
 				throw new IllegalStateException(
 					"Test case '" +
-					testCase.getDisplayName() +
-					"' of case set '" +
-					caseSetDisplayName +
-					"' in " +
-					problemClass.getName() +
-					"' has incompatible expected value: expected " +
-					expectedReturnType.getName() +
-					", but got " +
-					describeValueType(testCase.getExpected())
+						testCase.getDisplayName() +
+						"' of case set '" +
+						caseSetDisplayName +
+						"' in " +
+						problemClass.getName() +
+						"' has incompatible expected value: expected " +
+						expectedReturnType.getName() +
+						", but got " +
+						describeValueType(testCase.getExpected())
 				);
 			}
 		}
@@ -320,7 +363,11 @@ public class ProblemPreparator {
 		List<PreparedSolution> solutions
 	) {
 		for (PreparedSolution solution : solutions) {
-			validateSolutionSignature(problemClass, contract, solution.getSolutionMethod());
+			validateSolutionSignature(
+				problemClass,
+				contract,
+				solution.getSolutionMethod()
+			);
 		}
 	}
 
@@ -335,13 +382,13 @@ public class ProblemPreparator {
 		if (actualParams.length != expectedParams.length) {
 			throw new IllegalStateException(
 				"@Solution method '" +
-				solutionMethod.getName() +
-				"' in " +
-				problemClass.getName() +
-				" has " +
-				actualParams.length +
-				" parameter(s), but contract requires " +
-				expectedParams.length
+					solutionMethod.getName() +
+					"' in " +
+					problemClass.getName() +
+					" has " +
+					actualParams.length +
+					" parameter(s), but contract requires " +
+					expectedParams.length
 			);
 		}
 
@@ -349,15 +396,15 @@ public class ProblemPreparator {
 			if (!sameType(actualParams[i], expectedParams[i])) {
 				throw new IllegalStateException(
 					"@Solution method '" +
-					solutionMethod.getName() +
-					"' in " +
-					problemClass.getName() +
-					"' has incompatible parameter type at index " +
-					i +
-					": expected " +
-					expectedParams[i].getName() +
-					", got " +
-					actualParams[i].getName()
+						solutionMethod.getName() +
+						"' in " +
+						problemClass.getName() +
+						"' has incompatible parameter type at index " +
+						i +
+						": expected " +
+						expectedParams[i].getName() +
+						", got " +
+						actualParams[i].getName()
 				);
 			}
 		}
@@ -365,13 +412,13 @@ public class ProblemPreparator {
 		if (!sameType(solutionMethod.getReturnType(), contract.getExpectedType())) {
 			throw new IllegalStateException(
 				"@Solution method '" +
-				solutionMethod.getName() +
-				"' in " +
-				problemClass.getName() +
-				"' has incompatible return type: expected " +
-				contract.getExpectedType().getName() +
-				", got " +
-				solutionMethod.getReturnType().getName()
+					solutionMethod.getName() +
+					"' in " +
+					problemClass.getName() +
+					"' has incompatible return type: expected " +
+					contract.getExpectedType().getName() +
+					", got " +
+					solutionMethod.getReturnType().getName()
 			);
 		}
 	}
@@ -416,6 +463,8 @@ public class ProblemPreparator {
 		if (type == short.class) return Short.class;
 		if (type == void.class) return Void.class;
 
-		throw new IllegalArgumentException("Unknown primitive type: " + type.getName());
+		throw new IllegalArgumentException(
+			"Unknown primitive type: " + type.getName()
+		);
 	}
 }

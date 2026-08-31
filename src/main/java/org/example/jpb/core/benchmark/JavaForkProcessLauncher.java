@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkRequest;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkResult;
@@ -24,8 +23,11 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 	}
 
 	@Override
-	public ForkBenchmarkResult launch(ForkBenchmarkRequest request) throws IOException {
-		Process process = new ProcessBuilder(buildCommand()).redirectErrorStream(false).start();
+	public ForkBenchmarkResult launch(ForkBenchmarkRequest request)
+		throws IOException {
+		Process process = new ProcessBuilder(buildCommand())
+			.redirectErrorStream(false)
+			.start();
 
 		ByteArrayOutputStream stderr = new ByteArrayOutputStream();
 		Thread stderrDrainer = startDrainer(
@@ -50,9 +52,9 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 				return failed(
 					request,
 					"Fork timed out after " +
-					request.getConfig().getForkTimeoutMillis() +
-					" ms. stderr: " +
-					stderrText(stderr)
+						request.getConfig().getForkTimeoutMillis() +
+						" ms. stderr: " +
+						stderrText(stderr)
 				);
 			}
 
@@ -61,7 +63,10 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 			if (process.exitValue() != 0) {
 				return failed(
 					request,
-					"Fork exited with code " + process.exitValue() + ". stderr: " + stderrText(stderr)
+					"Fork exited with code " +
+						process.exitValue() +
+						". stderr: " +
+						stderrText(stderr)
 				);
 			}
 
@@ -70,7 +75,10 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 			Thread.currentThread().interrupt();
 			destroyProcess(process);
 
-			return failed(request, "Fork execution was interrupted. stderr: " + stderrText(stderr));
+			return failed(
+				request,
+				"Fork execution was interrupted. stderr: " + stderrText(stderr)
+			);
 		} finally {
 			closeQuietly(process.getOutputStream());
 			closeQuietly(process.getInputStream());
@@ -79,7 +87,11 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 	}
 
 	private List<String> buildCommand() {
-		String javaExecutable = Path.of(System.getProperty("java.home"), "bin", "java").toString();
+		String javaExecutable = Path.of(
+			System.getProperty("java.home"),
+			"bin",
+			"java"
+		).toString();
 
 		return List.of(
 			javaExecutable,
@@ -89,7 +101,8 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		);
 	}
 
-	private void writeRequest(Process process, ForkBenchmarkRequest request) throws IOException {
+	private void writeRequest(Process process, ForkBenchmarkRequest request)
+		throws IOException {
 		try (OutputStream outputStream = process.getOutputStream()) {
 			transport.writeRequest(outputStream, request);
 			outputStream.flush();
@@ -102,7 +115,10 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		int maxBytes,
 		String threadName
 	) {
-		Thread thread = new Thread(() -> drain(inputStream, target, maxBytes), threadName);
+		Thread thread = new Thread(
+			() -> drain(inputStream, target, maxBytes),
+			threadName
+		);
 
 		thread.setDaemon(true);
 		thread.start();
@@ -110,7 +126,11 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		return thread;
 	}
 
-	private void drain(InputStream inputStream, ByteArrayOutputStream target, int maxBytes) {
+	private void drain(
+		InputStream inputStream,
+		ByteArrayOutputStream target,
+		int maxBytes
+	) {
 		byte[] buffer = new byte[4_096];
 		int totalBytes = 0;
 
@@ -134,7 +154,9 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		process.destroy();
 
 		try {
-			if (!process.waitFor(TERMINATION_GRACE_PERIOD_MILLIS, TimeUnit.MILLISECONDS)) {
+			if (
+				!process.waitFor(TERMINATION_GRACE_PERIOD_MILLIS, TimeUnit.MILLISECONDS)
+			) {
 				process.destroyForcibly();
 				process.waitFor(TERMINATION_GRACE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
 			}
@@ -144,9 +166,11 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		}
 	}
 
-	private ForkBenchmarkResult failed(ForkBenchmarkRequest request, String errorMessage) {
-		return ForkBenchmarkResult
-			.builder()
+	private ForkBenchmarkResult failed(
+		ForkBenchmarkRequest request,
+		String errorMessage
+	) {
+		return ForkBenchmarkResult.builder()
 			.forkIndex(request.getForkIndex())
 			.status(BenchmarkStatus.FAILED)
 			.errorMessage(errorMessage)

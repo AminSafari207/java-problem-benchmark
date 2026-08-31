@@ -18,7 +18,9 @@ public final class Console {
 	private static final String H = "─";
 	private static final String V = "│";
 
-	private static final Pattern ANSI_PATTERN = Pattern.compile("\u001B\\[[0-9;]*m");
+	private static final Pattern ANSI_PATTERN = Pattern.compile(
+		"\u001B\\[[0-9;]*m"
+	);
 
 	private Console() {
 		System.out.println("Console must not be instantiated");
@@ -79,7 +81,11 @@ public final class Console {
 		return padRight(truncate(text, width), width);
 	}
 
-	public static String padColumnTruncate(String text, int width, int trailingPadding) {
+	public static String padColumnTruncate(
+		String text,
+		int width,
+		int trailingPadding
+	) {
 		if (width <= 0) {
 			throw new IllegalArgumentException("width must be positive");
 		}
@@ -99,7 +105,10 @@ public final class Console {
 			return " ".repeat(width);
 		}
 
-		return Console.padRightTruncate(value, contentWidth) + " ".repeat(trailingPadding);
+		return (
+			Console.padRightTruncate(value, contentWidth) +
+			" ".repeat(trailingPadding)
+		);
 	}
 
 	public static String padColumnTruncate(String text, int width) {

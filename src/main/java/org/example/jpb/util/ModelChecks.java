@@ -19,7 +19,10 @@ public final class ModelChecks {
 		return value;
 	}
 
-	public static String requireNormalizedNonBlank(String value, String fieldName) {
+	public static String requireNormalizedNonBlank(
+		String value,
+		String fieldName
+	) {
 		requireNonNull(value, fieldName);
 
 		if (value.isBlank()) {
@@ -27,7 +30,9 @@ public final class ModelChecks {
 		}
 
 		if (!value.equals(value.strip())) {
-			throw new IllegalArgumentException(fieldName + " must not start or end with whitespace");
+			throw new IllegalArgumentException(
+				fieldName + " must not start or end with whitespace"
+			);
 		}
 
 		return value;
@@ -49,7 +54,12 @@ public final class ModelChecks {
 		return Objects.requireNonNull(value, fieldName + " must not be null");
 	}
 
-	public static String requireLengthBetween(String value, int minLength, int maxLength, String fieldName) {
+	public static String requireLengthBetween(
+		String value,
+		int minLength,
+		int maxLength,
+		String fieldName
+	) {
 		requireNonNull(value, fieldName);
 
 		int length = value.length();
@@ -81,7 +91,12 @@ public final class ModelChecks {
 		String fieldName
 	) {
 		String resolved = defaultIfBlank(value, defaultValue);
-		return requireNormalizedNonBlankLengthBetween(resolved, minLength, maxLength, fieldName);
+		return requireNormalizedNonBlankLengthBetween(
+			resolved,
+			minLength,
+			maxLength,
+			fieldName
+		);
 	}
 
 	public static int requireNonNegative(int value, String fieldName) {
@@ -118,37 +133,66 @@ public final class ModelChecks {
 
 	public static void requireZero(long value, String fieldName) {
 		if (value != 0L) {
-			throw new IllegalArgumentException(fieldName + " must be 0 when sampleCount is 0");
+			throw new IllegalArgumentException(
+				fieldName + " must be 0 when sampleCount is 0"
+			);
 		}
 	}
 
 	public static void requireZero(double value, String fieldName) {
 		if (Double.compare(value, 0.0d) != 0) {
-			throw new IllegalArgumentException(fieldName + " must be 0 when sampleCount is 0");
+			throw new IllegalArgumentException(
+				fieldName + " must be 0 when sampleCount is 0"
+			);
 		}
 	}
 
-	public static int requireInRange(int value, int min, int max, String fieldName) {
+	public static int requireInRange(
+		int value,
+		int min,
+		int max,
+		String fieldName
+	) {
 		if (value < min || value > max) {
 			throw new IllegalArgumentException(
-				fieldName + " must be between " + min + " and " + max + ", got: " + value
+				fieldName +
+					" must be between " +
+					min +
+					" and " +
+					max +
+					", got: " +
+					value
 			);
 		}
 
 		return value;
 	}
 
-	public static long requireInRange(long value, long min, long max, String fieldName) {
+	public static long requireInRange(
+		long value,
+		long min,
+		long max,
+		String fieldName
+	) {
 		if (value < min || value > max) {
 			throw new IllegalArgumentException(
-				fieldName + " must be between " + min + " and " + max + ", got: " + value
+				fieldName +
+					" must be between " +
+					min +
+					" and " +
+					max +
+					", got: " +
+					value
 			);
 		}
 
 		return value;
 	}
 
-	public static <T> List<T> requireNonEmptyCopy(Collection<T> values, String fieldName) {
+	public static <T> List<T> requireNonEmptyCopy(
+		Collection<T> values,
+		String fieldName
+	) {
 		requireNonNull(values, fieldName);
 
 		if (values.isEmpty()) {
@@ -162,7 +206,10 @@ public final class ModelChecks {
 		return values == null ? List.of() : List.copyOf(values);
 	}
 
-	public static <T> List<T> requireCopy(Collection<T> values, String fieldName) {
+	public static <T> List<T> requireCopy(
+		Collection<T> values,
+		String fieldName
+	) {
 		requireNonNull(values, fieldName);
 		return List.copyOf(values);
 	}
@@ -180,7 +227,9 @@ public final class ModelChecks {
 			String id = idGetter.apply(item);
 
 			if (!seenIds.add(id)) {
-				throw new IllegalArgumentException("Duplicate " + fieldName + " id: '" + id + "'");
+				throw new IllegalArgumentException(
+					"Duplicate " + fieldName + " id: '" + id + "'"
+				);
 			}
 		}
 	}

@@ -19,14 +19,18 @@ public class TestCase {
 	private final Object expected;
 
 	@Builder
-	private TestCase(String id, String displayName, Arguments arguments, Object expected) {
-		this.id =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				id,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"id"
-			);
+	private TestCase(
+		String id,
+		String displayName,
+		Arguments arguments,
+		Object expected
+	) {
+		this.id = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			id,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"id"
+		);
 		this.displayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				displayName,
@@ -39,7 +43,12 @@ public class TestCase {
 		this.expected = ModelChecks.requireNonNull(expected, "expected");
 	}
 
-	public static TestCase of(String id, String displayName, Arguments arguments, Object expected) {
+	public static TestCase of(
+		String id,
+		String displayName,
+		Arguments arguments,
+		Object expected
+	) {
 		return new TestCase(id, displayName, arguments, expected);
 	}
 

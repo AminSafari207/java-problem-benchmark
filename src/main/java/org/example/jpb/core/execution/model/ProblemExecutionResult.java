@@ -17,8 +17,13 @@ public class ProblemExecutionResult {
 		ProblemResult problemResult,
 		ProblemBenchmarkResult problemBenchmarkResult
 	) {
-		this.problemResult = ModelChecks.requireNonNull(problemResult, "problemResult");
-		this.problemBenchmarkResult =
-			ModelChecks.requireNonNull(problemBenchmarkResult, "problemBenchmarkResult");
+		this.problemResult = ModelChecks.requireNonNull(
+			problemResult,
+			"problemResult"
+		);
+		this.problemBenchmarkResult = ModelChecks.requireNonNull(
+			problemBenchmarkResult,
+			"problemBenchmarkResult"
+		);
 	}
 }

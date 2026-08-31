@@ -1,7 +1,6 @@
 package org.example.jpb.core.preparation.model;
 
 import java.util.List;
-
 import lombok.Builder;
 import lombok.Getter;
 import org.example.jpb.core.shared.constants.ModelLimits;
@@ -16,14 +15,17 @@ public final class PreparedCaseSet {
 	private final List<TestCase> testCases;
 
 	@Builder
-	private PreparedCaseSet(String id, String displayName, List<TestCase> testCases) {
-		this.id =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				id,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"id"
-			);
+	private PreparedCaseSet(
+		String id,
+		String displayName,
+		List<TestCase> testCases
+	) {
+		this.id = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			id,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"id"
+		);
 		this.displayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				displayName,

@@ -22,10 +22,16 @@ public class BenchmarkRunner {
 	}
 
 	public BenchmarkRunner(ForkBenchmarkRunner forkBenchmarkRunner) {
-		this.forkBenchmarkRunner = ModelChecks.requireNonNull(forkBenchmarkRunner, "forkBenchmarkRunner");
+		this.forkBenchmarkRunner = ModelChecks.requireNonNull(
+			forkBenchmarkRunner,
+			"forkBenchmarkRunner"
+		);
 	}
 
-	public ProblemBenchmarkResult run(PreparedProblem preparedProblem, BenchmarkConfig config) {
+	public ProblemBenchmarkResult run(
+		PreparedProblem preparedProblem,
+		BenchmarkConfig config
+	) {
 		List<PreparedSolution> preparedSolutions = preparedProblem.getSolutions();
 
 		validateInputs(preparedProblem, preparedSolutions, config);
@@ -37,7 +43,10 @@ public class BenchmarkRunner {
 		return runForked(preparedProblem, config);
 	}
 
-	private ProblemBenchmarkResult runInProcess(PreparedProblem preparedProblem, BenchmarkConfig config) {
+	private ProblemBenchmarkResult runInProcess(
+		PreparedProblem preparedProblem,
+		BenchmarkConfig config
+	) {
 		List<SolutionBenchmarkResult> solutionsBenchmarkResults = new ArrayList<>();
 
 		for (PreparedSolution preparedSolution : preparedProblem.getSolutions()) {
@@ -50,8 +59,7 @@ public class BenchmarkRunner {
 			solutionsBenchmarkResults.add(benchmarkResult);
 		}
 
-		return ProblemBenchmarkResult
-			.builder()
+		return ProblemBenchmarkResult.builder()
 			.problemId(preparedProblem.getId())
 			.problemDisplayName(preparedProblem.getDisplayName())
 			.solutionBenchmarkResults(solutionsBenchmarkResults)
@@ -79,7 +87,10 @@ public class BenchmarkRunner {
 		);
 	}
 
-	private ProblemBenchmarkResult runForked(PreparedProblem preparedProblem, BenchmarkConfig config) {
+	private ProblemBenchmarkResult runForked(
+		PreparedProblem preparedProblem,
+		BenchmarkConfig config
+	) {
 		List<SolutionBenchmarkResult> solutionsBenchmarkResults = new ArrayList<>();
 
 		for (PreparedSolution preparedSolution : preparedProblem.getSolutions()) {
@@ -88,13 +99,15 @@ public class BenchmarkRunner {
 				preparedSolution,
 				config
 			);
-			SolutionBenchmarkResult benchmarkResult = aggregateForkResults(preparedSolution, forkResults);
+			SolutionBenchmarkResult benchmarkResult = aggregateForkResults(
+				preparedSolution,
+				forkResults
+			);
 
 			solutionsBenchmarkResults.add(benchmarkResult);
 		}
 
-		return ProblemBenchmarkResult
-			.builder()
+		return ProblemBenchmarkResult.builder()
 			.problemId(preparedProblem.getId())
 			.problemDisplayName(preparedProblem.getDisplayName())
 			.solutionBenchmarkResults(solutionsBenchmarkResults)
@@ -106,18 +119,27 @@ public class BenchmarkRunner {
 		List<ForkBenchmarkResult> forkResults
 	) {
 		if (forkResults == null || forkResults.isEmpty()) {
-			return failedForkAggregation(preparedSolution, "No fork benchmark results were returned");
+			return failedForkAggregation(
+				preparedSolution,
+				"No fork benchmark results were returned"
+			);
 		}
 
 		List<Long> allSamplesNanos = new ArrayList<>();
 
 		for (ForkBenchmarkResult forkResult : forkResults) {
 			if (forkResult == null) {
-				return failedForkAggregation(preparedSolution, "A fork returned no benchmark result");
+				return failedForkAggregation(
+					preparedSolution,
+					"A fork returned no benchmark result"
+				);
 			}
 
 			if (forkResult.getStatus() != BenchmarkStatus.SUCCESS) {
-				return failedForkAggregation(preparedSolution, formatForkFailure(forkResult));
+				return failedForkAggregation(
+					preparedSolution,
+					formatForkFailure(forkResult)
+				);
 			}
 
 			BenchmarkStats stats = forkResult.getStats();
@@ -125,7 +147,9 @@ public class BenchmarkRunner {
 			if (stats == null) {
 				return failedForkAggregation(
 					preparedSolution,
-					"Fork " + forkResult.getForkIndex() + " succeeded without benchmark stats"
+					"Fork " +
+						forkResult.getForkIndex() +
+						" succeeded without benchmark stats"
 				);
 			}
 
@@ -134,15 +158,16 @@ public class BenchmarkRunner {
 			if (samplesNanos == null || samplesNanos.isEmpty()) {
 				return failedForkAggregation(
 					preparedSolution,
-					"Fork " + forkResult.getForkIndex() + " succeeded without measurement samples"
+					"Fork " +
+						forkResult.getForkIndex() +
+						" succeeded without measurement samples"
 				);
 			}
 
 			allSamplesNanos.addAll(samplesNanos);
 		}
 
-		return SolutionBenchmarkResult
-			.builder()
+		return SolutionBenchmarkResult.builder()
 			.solutionId(preparedSolution.getId())
 			.solutionDisplayName(preparedSolution.getDisplayName())
 			.status(BenchmarkStatus.SUCCESS)
@@ -162,10 +187,13 @@ public class BenchmarkRunner {
 		try {
 			runWarmup(preparedProblem, preparedSolution, warmupIterations);
 
-			BenchmarkStats stats = runMeasurement(preparedProblem, preparedSolution, measurementIterations);
+			BenchmarkStats stats = runMeasurement(
+				preparedProblem,
+				preparedSolution,
+				measurementIterations
+			);
 
-			return SolutionBenchmarkResult
-				.builder()
+			return SolutionBenchmarkResult.builder()
 				.solutionId(preparedSolution.getId())
 				.solutionDisplayName(solutionName)
 				.status(BenchmarkStatus.SUCCESS)
@@ -173,8 +201,7 @@ public class BenchmarkRunner {
 				.errorMessage(null)
 				.build();
 		} catch (Exception e) {
-			return SolutionBenchmarkResult
-				.builder()
+			return SolutionBenchmarkResult.builder()
 				.solutionId(preparedSolution.getId())
 				.solutionDisplayName(solutionName)
 				.status(BenchmarkStatus.FAILED)
@@ -216,7 +243,10 @@ public class BenchmarkRunner {
 		return BenchmarkStats.of(samplesNanos);
 	}
 
-	private void runAllCases(PreparedSolution preparedSolution, Object[][] argumentsByCase) {
+	private void runAllCases(
+		PreparedSolution preparedSolution,
+		Object[][] argumentsByCase
+	) {
 		SolutionInvoker invoker = preparedSolution.getInvoker();
 
 		for (Object[] arguments : argumentsByCase) {
@@ -256,11 +286,15 @@ public class BenchmarkRunner {
 		}
 
 		if (config.getWarmupIterations() < 0) {
-			throw new IllegalArgumentException("warmupIterations must not be negative");
+			throw new IllegalArgumentException(
+				"warmupIterations must not be negative"
+			);
 		}
 
 		if (config.getMeasurementIterations() <= 0) {
-			throw new IllegalArgumentException("measurementIterations must be greater than zero");
+			throw new IllegalArgumentException(
+				"measurementIterations must be greater than zero"
+			);
 		}
 	}
 
@@ -272,7 +306,10 @@ public class BenchmarkRunner {
 		int testCaseCount = 0;
 
 		for (PreparedCaseSet preparedCaseSet : preparedProblem.getCaseSets()) {
-			testCaseCount = Math.addExact(testCaseCount, preparedCaseSet.getTestCases().size());
+			testCaseCount = Math.addExact(
+				testCaseCount,
+				preparedCaseSet.getTestCases().size()
+			);
 		}
 
 		Object[][] argumentsByCase = new Object[testCaseCount][];
@@ -291,8 +328,7 @@ public class BenchmarkRunner {
 		PreparedSolution preparedSolution,
 		String errorMessage
 	) {
-		return SolutionBenchmarkResult
-			.builder()
+		return SolutionBenchmarkResult.builder()
 			.solutionId(preparedSolution.getId())
 			.solutionDisplayName(preparedSolution.getDisplayName())
 			.status(BenchmarkStatus.FAILED)

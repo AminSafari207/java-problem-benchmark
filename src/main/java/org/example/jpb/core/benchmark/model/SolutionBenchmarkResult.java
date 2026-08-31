@@ -23,13 +23,12 @@ public class SolutionBenchmarkResult {
 		BenchmarkStats stats,
 		String errorMessage
 	) {
-		this.solutionId =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				solutionId,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"solutionId"
-			);
+		this.solutionId = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			solutionId,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"solutionId"
+		);
 		this.solutionDisplayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				solutionDisplayName,

@@ -11,11 +11,20 @@ public final class PreparedContract {
 	private final Class<?> expectedType;
 
 	private PreparedContract(Class<?>[] acceptedTypes, Class<?> expectedType) {
-		this.acceptedTypes = ModelChecks.requireNonNull(acceptedTypes, "acceptedTypes");
-		this.expectedType = ModelChecks.requireNonNull(expectedType, "expectedType");
+		this.acceptedTypes = ModelChecks.requireNonNull(
+			acceptedTypes,
+			"acceptedTypes"
+		);
+		this.expectedType = ModelChecks.requireNonNull(
+			expectedType,
+			"expectedType"
+		);
 	}
 
-	public static PreparedContract of(Class<?>[] acceptedTypes, Class<?> expectedType) {
+	public static PreparedContract of(
+		Class<?>[] acceptedTypes,
+		Class<?> expectedType
+	) {
 		return new PreparedContract(acceptedTypes, expectedType);
 	}
 

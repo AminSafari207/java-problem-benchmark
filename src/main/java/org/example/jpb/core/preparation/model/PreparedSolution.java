@@ -15,14 +15,18 @@ public class PreparedSolution {
 	private final SolutionInvoker invoker;
 
 	@Builder
-	public PreparedSolution(String id, String displayName, Method solutionMethod, SolutionInvoker invoker) {
-		this.id =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				id,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"id"
-			);
+	public PreparedSolution(
+		String id,
+		String displayName,
+		Method solutionMethod,
+		SolutionInvoker invoker
+	) {
+		this.id = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			id,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"id"
+		);
 		this.displayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				displayName,
@@ -31,7 +35,10 @@ public class PreparedSolution {
 				ModelLimits.DISPLAY_NAME_MAX_LENGTH,
 				"displayName"
 			);
-		this.solutionMethod = ModelChecks.requireNonNull(solutionMethod, "solutionMethod");
+		this.solutionMethod = ModelChecks.requireNonNull(
+			solutionMethod,
+			"solutionMethod"
+		);
 		this.invoker = ModelChecks.requireNonNull(invoker, "invoker");
 	}
 }

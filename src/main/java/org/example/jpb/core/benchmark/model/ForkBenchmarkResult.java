@@ -28,8 +28,14 @@ public class ForkBenchmarkResult {
 		this.forkIndex = ModelChecks.requireNonNegative(forkIndex, "forkIndex");
 		this.status = ModelChecks.requireNonNull(status, "status");
 		this.stats = stats;
-		this.gcCountDelta = ModelChecks.requireNonNegative(gcCountDelta, "gcCountDelta");
-		this.gcTimeMillisDelta = ModelChecks.requireNonNegative(gcTimeMillisDelta, "gcTimeMillisDelta");
+		this.gcCountDelta = ModelChecks.requireNonNegative(
+			gcCountDelta,
+			"gcCountDelta"
+		);
+		this.gcTimeMillisDelta = ModelChecks.requireNonNegative(
+			gcTimeMillisDelta,
+			"gcTimeMillisDelta"
+		);
 		this.errorMessage = errorMessage;
 
 		validateConsistency();

@@ -14,14 +14,17 @@ public class ProblemResult {
 	private final List<SolutionResult> solutionResults;
 
 	@Builder
-	private ProblemResult(String problemId, String problemDisplayName, List<SolutionResult> solutionResults) {
-		this.problemId =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				problemId,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"problemId"
-			);
+	private ProblemResult(
+		String problemId,
+		String problemDisplayName,
+		List<SolutionResult> solutionResults
+	) {
+		this.problemId = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			problemId,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"problemId"
+		);
 		this.problemDisplayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				problemDisplayName,
@@ -30,6 +33,9 @@ public class ProblemResult {
 				ModelLimits.DISPLAY_NAME_MAX_LENGTH,
 				"problemDisplayName"
 			);
-		this.solutionResults = ModelChecks.requireNonEmptyCopy(solutionResults, "solutionResults");
+		this.solutionResults = ModelChecks.requireNonEmptyCopy(
+			solutionResults,
+			"solutionResults"
+		);
 	}
 }

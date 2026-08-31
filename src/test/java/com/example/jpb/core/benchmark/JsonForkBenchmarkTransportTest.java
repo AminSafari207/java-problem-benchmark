@@ -23,14 +23,17 @@ import org.junit.jupiter.api.Test;
 
 class JsonForkBenchmarkTransportTest {
 
-	private final ForkBenchmarkTransport transport = new JsonForkBenchmarkTransport();
+	private final ForkBenchmarkTransport transport =
+		new JsonForkBenchmarkTransport();
 
 	@Problem(id = "dummy-problem", displayName = "Dummy")
 	@Contract(accepts = { Integer.class }, expects = Integer.class)
 	static class DummyProblem {
 
 		@CaseSet(id = "case-set-01")
-		public List<TestCase> cases2 = List.of(TestCase.of("three", Arguments.single(1), 1));
+		public List<TestCase> cases2 = List.of(
+			TestCase.of("three", Arguments.single(1), 1)
+		);
 
 		@Solution(id = "return-one")
 		public Integer solve(Integer input) {
@@ -40,15 +43,13 @@ class JsonForkBenchmarkTransportTest {
 
 	@Test
 	void shouldWriteAndReadRequest() throws Exception {
-		BenchmarkConfig config = BenchmarkConfig
-			.builder()
+		BenchmarkConfig config = BenchmarkConfig.builder()
 			.warmupIterations(3)
 			.measurementIterations(5)
 			.forkCount(1)
 			.build();
 
-		ForkBenchmarkRequest request = ForkBenchmarkRequest
-			.builder()
+		ForkBenchmarkRequest request = ForkBenchmarkRequest.builder()
 			.forkIndex(0)
 			.problemId("two-sum")
 			.problemClassName("org.example.jpb.problems.TwoSumProblem")
@@ -60,23 +61,23 @@ class JsonForkBenchmarkTransportTest {
 
 		transport.writeRequest(output, request);
 
-		ForkBenchmarkRequest actual = transport.readRequest(new ByteArrayInputStream(output.toByteArray()));
+		ForkBenchmarkRequest actual = transport.readRequest(
+			new ByteArrayInputStream(output.toByteArray())
+		);
 
 		assertEquals(request, actual);
 	}
 
 	@Test
 	void launchReturnsWorkerResult() throws IOException {
-		BenchmarkConfig config = BenchmarkConfig
-			.builder()
+		BenchmarkConfig config = BenchmarkConfig.builder()
 			.warmupIterations(1)
 			.measurementIterations(2)
 			.forkCount(1)
 			.forkTimeoutMillis(5_000L)
 			.build();
 
-		ForkBenchmarkRequest request = ForkBenchmarkRequest
-			.builder()
+		ForkBenchmarkRequest request = ForkBenchmarkRequest.builder()
 			.forkIndex(3)
 			.problemId("dummy-problem")
 			.problemClassName(DummyProblem.class.getName())
@@ -84,7 +85,9 @@ class JsonForkBenchmarkTransportTest {
 			.config(config)
 			.build();
 
-		JavaForkProcessLauncher launcher = new JavaForkProcessLauncher(new JsonForkBenchmarkTransport());
+		JavaForkProcessLauncher launcher = new JavaForkProcessLauncher(
+			new JsonForkBenchmarkTransport()
+		);
 
 		ForkBenchmarkResult result = launcher.launch(request);
 

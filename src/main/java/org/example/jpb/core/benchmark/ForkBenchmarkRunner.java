@@ -3,7 +3,6 @@ package org.example.jpb.core.benchmark;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.core.benchmark.model.BenchmarkConfig;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkRequest;
@@ -31,8 +30,7 @@ public class ForkBenchmarkRunner {
 		List<ForkBenchmarkResult> results = new ArrayList<>(config.getForkCount());
 
 		for (int forkIndex = 0; forkIndex < config.getForkCount(); forkIndex++) {
-			ForkBenchmarkRequest request = ForkBenchmarkRequest
-				.builder()
+			ForkBenchmarkRequest request = ForkBenchmarkRequest.builder()
 				.forkIndex(forkIndex)
 				.problemId(preparedProblem.getId())
 				.problemClassName(preparedProblem.getProblemClass().getName())
@@ -50,11 +48,13 @@ public class ForkBenchmarkRunner {
 		try {
 			return processLauncher.launch(request);
 		} catch (IOException exception) {
-			return ForkBenchmarkResult
-				.builder()
+			return ForkBenchmarkResult.builder()
 				.forkIndex(request.getForkIndex())
 				.status(BenchmarkStatus.FAILED)
-				.errorMessage("Could not start or communicate with fork process: " + exception.getMessage())
+				.errorMessage(
+					"Could not start or communicate with fork process: " +
+						exception.getMessage()
+				)
 				.build();
 		}
 	}

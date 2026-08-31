@@ -19,13 +19,12 @@ public class SolutionResult {
 		String solutionDisplayName,
 		List<CaseSetResult> caseSetResults
 	) {
-		this.solutionId =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				solutionId,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"solutionId"
-			);
+		this.solutionId = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			solutionId,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"solutionId"
+		);
 		this.solutionDisplayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				solutionDisplayName,
@@ -34,7 +33,10 @@ public class SolutionResult {
 				ModelLimits.DISPLAY_NAME_MAX_LENGTH,
 				"solutionDisplayName"
 			);
-		this.caseSetResults = ModelChecks.requireNonEmptyCopy(caseSetResults, "caseSetResults");
+		this.caseSetResults = ModelChecks.requireNonEmptyCopy(
+			caseSetResults,
+			"caseSetResults"
+		);
 	}
 
 	public long passedCount() {

@@ -14,14 +14,17 @@ public class CaseSetResult {
 	private final List<TestCaseResult> testCaseResults;
 
 	@Builder
-	public CaseSetResult(String caseSetId, String caseSetDisplayName, List<TestCaseResult> testCaseResults) {
-		this.caseSetId =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				caseSetId,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"caseSetId"
-			);
+	public CaseSetResult(
+		String caseSetId,
+		String caseSetDisplayName,
+		List<TestCaseResult> testCaseResults
+	) {
+		this.caseSetId = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			caseSetId,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"caseSetId"
+		);
 		this.caseSetDisplayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				caseSetDisplayName,
@@ -30,7 +33,10 @@ public class CaseSetResult {
 				ModelLimits.DISPLAY_NAME_MAX_LENGTH,
 				"caseSetDisplayName"
 			);
-		this.testCaseResults = ModelChecks.requireNonEmptyCopy(testCaseResults, "testCaseResults");
+		this.testCaseResults = ModelChecks.requireNonEmptyCopy(
+			testCaseResults,
+			"testCaseResults"
+		);
 	}
 
 	public long passedCount() {

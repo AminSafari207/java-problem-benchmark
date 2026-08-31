@@ -9,7 +9,9 @@ import org.example.jpb.core.benchmark.model.ForkBenchmarkRequest;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkResult;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkTransport;
 
-public final class JsonForkBenchmarkTransport implements ForkBenchmarkTransport {
+public final class JsonForkBenchmarkTransport
+	implements ForkBenchmarkTransport
+{
 
 	private final ObjectMapper objectMapper;
 
@@ -22,22 +24,28 @@ public final class JsonForkBenchmarkTransport implements ForkBenchmarkTransport 
 	}
 
 	@Override
-	public void writeRequest(OutputStream outputStream, ForkBenchmarkRequest request) throws IOException {
+	public void writeRequest(
+		OutputStream outputStream,
+		ForkBenchmarkRequest request
+	) throws IOException {
 		objectMapper.writeValue(outputStream, request);
 	}
 
 	@Override
-	public ForkBenchmarkRequest readRequest(InputStream inputStream) throws IOException {
+	public ForkBenchmarkRequest readRequest(InputStream inputStream)
+		throws IOException {
 		return objectMapper.readValue(inputStream, ForkBenchmarkRequest.class);
 	}
 
 	@Override
-	public void writeResult(OutputStream outputStream, ForkBenchmarkResult result) throws IOException {
+	public void writeResult(OutputStream outputStream, ForkBenchmarkResult result)
+		throws IOException {
 		objectMapper.writeValue(outputStream, result);
 	}
 
 	@Override
-	public ForkBenchmarkResult readResult(InputStream inputStream) throws IOException {
+	public ForkBenchmarkResult readResult(InputStream inputStream)
+		throws IOException {
 		return objectMapper.readValue(inputStream, ForkBenchmarkResult.class);
 	}
 }

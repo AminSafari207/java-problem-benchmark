@@ -52,18 +52,21 @@ class ProblemRunnerTest {
 
 	@Test
 	void shouldRunCorrectnessChecksAndBenchmarkOnlyPassingSolutions() {
-		BenchmarkConfig benchmarkConfig = BenchmarkConfig
-			.builder()
+		BenchmarkConfig benchmarkConfig = BenchmarkConfig.builder()
 			.warmupIterations(1)
 			.measurementIterations(1)
 			.forkCount(0)
 			.build();
 
 		ProblemExecutor problemExecutor = new ProblemExecutor();
-		ProblemExecutionResult executionResult = problemExecutor.execute(DummyProblem.class, benchmarkConfig);
+		ProblemExecutionResult executionResult = problemExecutor.execute(
+			DummyProblem.class,
+			benchmarkConfig
+		);
 
 		ProblemResult problemResult = executionResult.getProblemResult();
-		ProblemBenchmarkResult benchmarkResult = executionResult.getProblemBenchmarkResult();
+		ProblemBenchmarkResult benchmarkResult =
+			executionResult.getProblemBenchmarkResult();
 
 		assertNotNull(problemResult);
 		assertEquals("Dummy", problemResult.getProblemDisplayName());
@@ -71,7 +74,10 @@ class ProblemRunnerTest {
 
 		assertNotNull(benchmarkResult);
 		assertEquals(1, benchmarkResult.getSolutionBenchmarkResults().size());
-		assertEquals("add-one", benchmarkResult.getSolutionBenchmarkResults().getFirst().getSolutionId());
+		assertEquals(
+			"add-one",
+			benchmarkResult.getSolutionBenchmarkResults().getFirst().getSolutionId()
+		);
 		assertEquals(
 			BenchmarkStatus.SUCCESS,
 			benchmarkResult.getSolutionBenchmarkResults().getFirst().getStatus()

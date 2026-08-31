@@ -22,13 +22,12 @@ public class TestCaseResult {
 		Object actual,
 		boolean passed
 	) {
-		this.testCaseId =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				testCaseId,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"testCaseId"
-			);
+		this.testCaseId = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			testCaseId,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"testCaseId"
+		);
 		this.testCaseDisplayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				testCaseDisplayName,

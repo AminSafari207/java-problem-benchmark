@@ -21,7 +21,9 @@ public final class ForkBenchmarkWorker {
 
 			transport.writeResult(System.out, result);
 		} catch (Exception exception) {
-			System.err.println("Fork benchmark worker failed: " + exception.getMessage());
+			System.err.println(
+				"Fork benchmark worker failed: " + exception.getMessage()
+			);
 			System.exit(1);
 		}
 	}
@@ -29,37 +31,40 @@ public final class ForkBenchmarkWorker {
 	private static ForkBenchmarkResult run(ForkBenchmarkRequest request) {
 		try {
 			PreparedProblem preparedProblem = prepareProblem(request);
-			PreparedSolution preparedSolution = findSolution(preparedProblem, request);
+			PreparedSolution preparedSolution = findSolution(
+				preparedProblem,
+				request
+			);
 
-			BenchmarkConfig inProcessConfig = BenchmarkConfig
-				.builder()
+			BenchmarkConfig inProcessConfig = BenchmarkConfig.builder()
 				.warmupIterations(request.getConfig().getWarmupIterations())
 				.measurementIterations(request.getConfig().getMeasurementIterations())
 				.forkCount(0)
 				.forkTimeoutMillis(request.getConfig().getForkTimeoutMillis())
 				.build();
 
-			SolutionBenchmarkResult benchmarkResult = new BenchmarkRunner()
-				.runSingleSolutionInProcess(preparedProblem, preparedSolution, inProcessConfig);
+			SolutionBenchmarkResult benchmarkResult =
+				new BenchmarkRunner().runSingleSolutionInProcess(
+					preparedProblem,
+					preparedSolution,
+					inProcessConfig
+				);
 
 			if (benchmarkResult.getStatus() == BenchmarkStatus.FAILED) {
-				return ForkBenchmarkResult
-					.builder()
+				return ForkBenchmarkResult.builder()
 					.forkIndex(request.getForkIndex())
 					.status(BenchmarkStatus.FAILED)
 					.errorMessage(benchmarkResult.getErrorMessage())
 					.build();
 			}
 
-			return ForkBenchmarkResult
-				.builder()
+			return ForkBenchmarkResult.builder()
 				.forkIndex(request.getForkIndex())
 				.status(BenchmarkStatus.SUCCESS)
 				.stats(benchmarkResult.getStats())
 				.build();
 		} catch (Exception exception) {
-			return ForkBenchmarkResult
-				.builder()
+			return ForkBenchmarkResult.builder()
 				.forkIndex(request.getForkIndex())
 				.status(BenchmarkStatus.FAILED)
 				.errorMessage(buildErrorMessage(exception))
@@ -71,17 +76,19 @@ public final class ForkBenchmarkWorker {
 		throws ClassNotFoundException {
 		Class<?> problemClass = Class.forName(request.getProblemClassName());
 
-		PreparedProblem preparedProblem = new ProblemPreparator().prepare(problemClass);
+		PreparedProblem preparedProblem = new ProblemPreparator().prepare(
+			problemClass
+		);
 
 		if (!preparedProblem.getId().equals(request.getProblemId())) {
 			throw new IllegalStateException(
 				"Problem class '" +
-				request.getProblemClassName() +
-				"' resolved to problem ID '" +
-				preparedProblem.getId() +
-				"', but request expected '" +
-				request.getProblemId() +
-				"'"
+					request.getProblemClassName() +
+					"' resolved to problem ID '" +
+					preparedProblem.getId() +
+					"', but request expected '" +
+					request.getProblemId() +
+					"'"
 			);
 		}
 
@@ -100,10 +107,10 @@ public final class ForkBenchmarkWorker {
 			.orElseThrow(() ->
 				new IllegalArgumentException(
 					"Solution '" +
-					request.getSolutionId() +
-					"' was not found for problem '" +
-					request.getProblemId() +
-					"'"
+						request.getSolutionId() +
+						"' was not found for problem '" +
+						request.getProblemId() +
+						"'"
 				)
 			);
 	}

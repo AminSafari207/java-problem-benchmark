@@ -27,13 +27,12 @@ public class PreparedProblem {
 		List<PreparedCaseSet> caseSets,
 		List<PreparedSolution> solutions
 	) {
-		this.id =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				id,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"id"
-			);
+		this.id = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			id,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"id"
+		);
 		this.displayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				displayName,
@@ -42,17 +41,33 @@ public class PreparedProblem {
 				ModelLimits.DISPLAY_NAME_MAX_LENGTH,
 				"displayName"
 			);
-		this.problemClass = ModelChecks.requireNonNull(problemClass, "problemClass");
-		this.problemInstance = ModelChecks.requireNonNull(problemInstance, "problemInstance");
+		this.problemClass = ModelChecks.requireNonNull(
+			problemClass,
+			"problemClass"
+		);
+		this.problemInstance = ModelChecks.requireNonNull(
+			problemInstance,
+			"problemInstance"
+		);
 		this.contract = ModelChecks.requireNonNull(contract, "contract");
 		this.caseSets = ModelChecks.requireNonEmptyCopy(caseSets, "caseSets");
 		this.solutions = ModelChecks.requireNonEmptyCopy(solutions, "solutions");
 
-		ModelChecks.requireUniqueIds(this.caseSets, PreparedCaseSet::getId, "caseSets");
-		ModelChecks.requireUniqueIds(this.solutions, PreparedSolution::getId, "solutions");
+		ModelChecks.requireUniqueIds(
+			this.caseSets,
+			PreparedCaseSet::getId,
+			"caseSets"
+		);
+		ModelChecks.requireUniqueIds(
+			this.solutions,
+			PreparedSolution::getId,
+			"solutions"
+		);
 	}
 
-	public PreparedProblem withNewSolutions(List<PreparedSolution> newPreparedSolutions) {
+	public PreparedProblem withNewSolutions(
+		List<PreparedSolution> newPreparedSolutions
+	) {
 		return toBuilder().solutions(newPreparedSolutions).build();
 	}
 }

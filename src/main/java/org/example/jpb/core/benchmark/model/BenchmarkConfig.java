@@ -31,29 +31,28 @@ public final class BenchmarkConfig {
 		Integer forkCount,
 		Long forkTimeoutMillis
 	) {
-		this.warmupIterations =
-			ModelChecks.requireNonNegative(
-				ModelChecks.defaultIfNull(warmupIterations, DEFAULT_WARMUP_ITERATIONS),
-				"warmupIterations"
-			);
-		this.measurementIterations =
-			ModelChecks.requirePositive(
-				ModelChecks.defaultIfNull(measurementIterations, DEFAULT_MEASUREMENT_ITERATIONS),
-				"measurementIterations"
-			);
-		this.forkCount =
-			ModelChecks.requireInRange(
-				ModelChecks.defaultIfNull(forkCount, DEFAULT_FORK_COUNT),
-				MIN_FORK_COUNT,
-				MAX_FORK_COUNT,
-				"forkCount"
-			);
-		this.forkTimeoutMillis =
-			ModelChecks.requireInRange(
-				ModelChecks.defaultIfNull(forkTimeoutMillis, DEFAULT_FORK_TIMEOUT_MILLIS),
-				MIN_FORK_TIMEOUT_MILLIS,
-				MAX_FORK_TIMEOUT_MILLIS,
-				"forkTimeoutMillis"
-			);
+		this.warmupIterations = ModelChecks.requireNonNegative(
+			ModelChecks.defaultIfNull(warmupIterations, DEFAULT_WARMUP_ITERATIONS),
+			"warmupIterations"
+		);
+		this.measurementIterations = ModelChecks.requirePositive(
+			ModelChecks.defaultIfNull(
+				measurementIterations,
+				DEFAULT_MEASUREMENT_ITERATIONS
+			),
+			"measurementIterations"
+		);
+		this.forkCount = ModelChecks.requireInRange(
+			ModelChecks.defaultIfNull(forkCount, DEFAULT_FORK_COUNT),
+			MIN_FORK_COUNT,
+			MAX_FORK_COUNT,
+			"forkCount"
+		);
+		this.forkTimeoutMillis = ModelChecks.requireInRange(
+			ModelChecks.defaultIfNull(forkTimeoutMillis, DEFAULT_FORK_TIMEOUT_MILLIS),
+			MIN_FORK_TIMEOUT_MILLIS,
+			MAX_FORK_TIMEOUT_MILLIS,
+			"forkTimeoutMillis"
+		);
 	}
 }

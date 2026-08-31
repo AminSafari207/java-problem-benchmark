@@ -21,13 +21,12 @@ public class ProblemBenchmarkResult {
 		List<SolutionBenchmarkResult> solutionBenchmarkResults,
 		String skipReason
 	) {
-		this.problemId =
-			ModelChecks.requireNormalizedNonBlankLengthBetween(
-				problemId,
-				ModelLimits.ID_MIN_LENGTH,
-				ModelLimits.ID_MAX_LENGTH,
-				"problemId"
-			);
+		this.problemId = ModelChecks.requireNormalizedNonBlankLengthBetween(
+			problemId,
+			ModelLimits.ID_MIN_LENGTH,
+			ModelLimits.ID_MAX_LENGTH,
+			"problemId"
+		);
 		this.problemDisplayName =
 			ModelChecks.requireNormalizedNonBlankLengthBetweenOrDefault(
 				problemDisplayName,
@@ -36,8 +35,10 @@ public class ProblemBenchmarkResult {
 				ModelLimits.DISPLAY_NAME_MAX_LENGTH,
 				"problemDisplayName"
 			);
-		this.solutionBenchmarkResults =
-			ModelChecks.requireCopy(solutionBenchmarkResults, "solutionBenchmarkResults");
+		this.solutionBenchmarkResults = ModelChecks.requireCopy(
+			solutionBenchmarkResults,
+			"solutionBenchmarkResults"
+		);
 		this.skipReason = ModelChecks.defaultIfBlank(skipReason, null);
 
 		ModelChecks.requireUniqueIds(
@@ -55,9 +56,12 @@ public class ProblemBenchmarkResult {
 		return !solutionBenchmarkResults.isEmpty();
 	}
 
-	public static ProblemBenchmarkResult skipped(String problemId, String problemDisplayName, String reason) {
-		return ProblemBenchmarkResult
-			.builder()
+	public static ProblemBenchmarkResult skipped(
+		String problemId,
+		String problemDisplayName,
+		String reason
+	) {
+		return ProblemBenchmarkResult.builder()
 			.problemId(problemId)
 			.problemDisplayName(problemDisplayName)
 			.solutionBenchmarkResults(List.of())
