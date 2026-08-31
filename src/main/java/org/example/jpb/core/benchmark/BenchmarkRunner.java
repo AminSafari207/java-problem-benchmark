@@ -9,10 +9,21 @@ import org.example.jpb.core.preparation.model.PreparedProblem;
 import org.example.jpb.core.preparation.model.PreparedSolution;
 import org.example.jpb.core.preparation.model.SolutionInvoker;
 import org.example.jpb.core.shared.model.TestCase;
+import org.example.jpb.util.ModelChecks;
 
 public class BenchmarkRunner {
 
 	private static volatile Object resultSink;
+
+	private final ForkBenchmarkRunner forkBenchmarkRunner;
+
+	public BenchmarkRunner() {
+		this(new ForkBenchmarkRunner());
+	}
+
+	public BenchmarkRunner(ForkBenchmarkRunner forkBenchmarkRunner) {
+		this.forkBenchmarkRunner = ModelChecks.requireNonNull(forkBenchmarkRunner, "forkBenchmarkRunner");
+	}
 
 	public ProblemBenchmarkResult run(PreparedProblem preparedProblem, BenchmarkConfig config) {
 		List<PreparedSolution> preparedSolutions = preparedProblem.getSolutions();
@@ -27,17 +38,13 @@ public class BenchmarkRunner {
 	}
 
 	private ProblemBenchmarkResult runInProcess(PreparedProblem preparedProblem, BenchmarkConfig config) {
-		int warmupIterations = config.getWarmupIterations();
-		int measurementIterations = config.getMeasurementIterations();
-
 		List<SolutionBenchmarkResult> solutionsBenchmarkResults = new ArrayList<>();
 
 		for (PreparedSolution preparedSolution : preparedProblem.getSolutions()) {
-			SolutionBenchmarkResult benchmarkResult = benchmarkSolution(
+			SolutionBenchmarkResult benchmarkResult = runSingleSolutionInProcess(
 				preparedProblem,
 				preparedSolution,
-				warmupIterations,
-				measurementIterations
+				config
 			);
 
 			solutionsBenchmarkResults.add(benchmarkResult);
@@ -73,12 +80,14 @@ public class BenchmarkRunner {
 	}
 
 	private ProblemBenchmarkResult runForked(PreparedProblem preparedProblem, BenchmarkConfig config) {
-		ForkBenchmarkRunner runner = new ForkBenchmarkRunner();
-
 		List<SolutionBenchmarkResult> solutionsBenchmarkResults = new ArrayList<>();
 
 		for (PreparedSolution preparedSolution : preparedProblem.getSolutions()) {
-			List<ForkBenchmarkResult> forkResults = runner.run(preparedProblem, preparedSolution, config);
+			List<ForkBenchmarkResult> forkResults = forkBenchmarkRunner.run(
+				preparedProblem,
+				preparedSolution,
+				config
+			);
 			SolutionBenchmarkResult benchmarkResult = aggregateForkResults(preparedSolution, forkResults);
 
 			solutionsBenchmarkResults.add(benchmarkResult);
@@ -96,7 +105,50 @@ public class BenchmarkRunner {
 		PreparedSolution preparedSolution,
 		List<ForkBenchmarkResult> forkResults
 	) {
-		throw new UnsupportedOperationException("Fork result aggregation is not implemented yet");
+		if (forkResults == null || forkResults.isEmpty()) {
+			return failedForkAggregation(preparedSolution, "No fork benchmark results were returned");
+		}
+
+		List<Long> allSamplesNanos = new ArrayList<>();
+
+		for (ForkBenchmarkResult forkResult : forkResults) {
+			if (forkResult == null) {
+				return failedForkAggregation(preparedSolution, "A fork returned no benchmark result");
+			}
+
+			if (forkResult.getStatus() != BenchmarkStatus.SUCCESS) {
+				return failedForkAggregation(preparedSolution, formatForkFailure(forkResult));
+			}
+
+			BenchmarkStats stats = forkResult.getStats();
+
+			if (stats == null) {
+				return failedForkAggregation(
+					preparedSolution,
+					"Fork " + forkResult.getForkIndex() + " succeeded without benchmark stats"
+				);
+			}
+
+			List<Long> samplesNanos = stats.getSamplesNanos();
+
+			if (samplesNanos == null || samplesNanos.isEmpty()) {
+				return failedForkAggregation(
+					preparedSolution,
+					"Fork " + forkResult.getForkIndex() + " succeeded without measurement samples"
+				);
+			}
+
+			allSamplesNanos.addAll(samplesNanos);
+		}
+
+		return SolutionBenchmarkResult
+			.builder()
+			.solutionId(preparedSolution.getId())
+			.solutionDisplayName(preparedSolution.getDisplayName())
+			.status(BenchmarkStatus.SUCCESS)
+			.stats(BenchmarkStats.of(allSamplesNanos))
+			.errorMessage(null)
+			.build();
 	}
 
 	private SolutionBenchmarkResult benchmarkSolution(
@@ -233,5 +285,29 @@ public class BenchmarkRunner {
 		}
 
 		return argumentsByCase;
+	}
+
+	private SolutionBenchmarkResult failedForkAggregation(
+		PreparedSolution preparedSolution,
+		String errorMessage
+	) {
+		return SolutionBenchmarkResult
+			.builder()
+			.solutionId(preparedSolution.getId())
+			.solutionDisplayName(preparedSolution.getDisplayName())
+			.status(BenchmarkStatus.FAILED)
+			.stats(null)
+			.errorMessage(errorMessage)
+			.build();
+	}
+
+	private String formatForkFailure(ForkBenchmarkResult forkResult) {
+		String errorMessage = forkResult.getErrorMessage();
+
+		if (errorMessage == null || errorMessage.isBlank()) {
+			errorMessage = "No error message was provided";
+		}
+
+		return "Fork " + forkResult.getForkIndex() + " failed: " + errorMessage;
 	}
 }

@@ -3,14 +3,14 @@ package org.example.jpb.core.benchmark.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
-import org.example.jpb.core.benchmark.enums.ForkBenchmarkStatus;
+import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.util.ModelChecks;
 
 @Getter
 public class ForkBenchmarkResult {
 
 	private final int forkIndex;
-	private final ForkBenchmarkStatus status;
+	private final BenchmarkStatus status;
 	private final BenchmarkStats stats;
 	private final long gcCountDelta;
 	private final long gcTimeMillisDelta;
@@ -19,7 +19,7 @@ public class ForkBenchmarkResult {
 	@Builder
 	private ForkBenchmarkResult(
 		int forkIndex,
-		ForkBenchmarkStatus status,
+		BenchmarkStatus status,
 		BenchmarkStats stats,
 		long gcCountDelta,
 		long gcTimeMillisDelta,
@@ -36,22 +36,22 @@ public class ForkBenchmarkResult {
 	}
 
 	private void validateConsistency() {
-		if (status == ForkBenchmarkStatus.SUCCESS) {
+		if (status == BenchmarkStatus.SUCCESS) {
 			ModelChecks.requireNonNull(stats, "stats");
 		}
 
-		if (status == ForkBenchmarkStatus.FAILED) {
+		if (status == BenchmarkStatus.FAILED) {
 			ModelChecks.requireNonBlank(errorMessage, "errorMessage");
 		}
 	}
 
 	@JsonIgnore
 	public boolean isSuccess() {
-		return status == ForkBenchmarkStatus.SUCCESS;
+		return status == BenchmarkStatus.SUCCESS;
 	}
 
 	@JsonIgnore
 	public boolean isFailed() {
-		return status == ForkBenchmarkStatus.FAILED;
+		return status == BenchmarkStatus.FAILED;
 	}
 }

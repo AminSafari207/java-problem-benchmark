@@ -1,7 +1,6 @@
 package org.example.jpb.core.benchmark;
 
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
-import org.example.jpb.core.benchmark.enums.ForkBenchmarkStatus;
 import org.example.jpb.core.benchmark.model.*;
 import org.example.jpb.core.preparation.ProblemPreparator;
 import org.example.jpb.core.preparation.model.PreparedProblem;
@@ -47,7 +46,7 @@ public final class ForkBenchmarkWorker {
 				return ForkBenchmarkResult
 					.builder()
 					.forkIndex(request.getForkIndex())
-					.status(ForkBenchmarkStatus.FAILED)
+					.status(BenchmarkStatus.FAILED)
 					.errorMessage(benchmarkResult.getErrorMessage())
 					.build();
 			}
@@ -55,14 +54,14 @@ public final class ForkBenchmarkWorker {
 			return ForkBenchmarkResult
 				.builder()
 				.forkIndex(request.getForkIndex())
-				.status(ForkBenchmarkStatus.SUCCESS)
+				.status(BenchmarkStatus.SUCCESS)
 				.stats(benchmarkResult.getStats())
 				.build();
 		} catch (Exception exception) {
 			return ForkBenchmarkResult
 				.builder()
 				.forkIndex(request.getForkIndex())
-				.status(ForkBenchmarkStatus.FAILED)
+				.status(BenchmarkStatus.FAILED)
 				.errorMessage(buildErrorMessage(exception))
 				.build();
 		}

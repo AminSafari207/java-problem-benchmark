@@ -1,7 +1,6 @@
 package org.example.jpb.render.console;
 
 import java.util.Arrays;
-
 import org.example.jpb.core.benchmark.model.BenchmarkStats;
 import org.example.jpb.core.benchmark.model.ProblemBenchmarkResult;
 import org.example.jpb.core.benchmark.model.SolutionBenchmarkResult;
@@ -14,6 +13,23 @@ import org.example.jpb.render.model.ConsoleRenderOptions;
 import org.example.jpb.util.Console;
 
 public class ProblemConsoleRenderer {
+
+	public void render(ProblemResult problemResult, ConsoleRenderOptions config) {
+		renderProblemResult(problemResult, config);
+	}
+
+	public void render(ProblemBenchmarkResult benchmarkResult, ConsoleRenderOptions config) {
+		renderBenchmarkResult(benchmarkResult, config);
+	}
+
+	public void render(
+		ProblemResult problemResult,
+		ProblemBenchmarkResult benchmarkResult,
+		ConsoleRenderOptions config
+	) {
+		renderProblemResult(problemResult, config);
+		renderBenchmarkResult(benchmarkResult, config);
+	}
 
 	//#################################
 	//## Problem Correctness ##########

@@ -5,13 +5,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.example.jpb.core.benchmark.enums.ForkBenchmarkStatus;
+
+import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkRequest;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkResult;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkTransport;
+import org.example.jpb.core.benchmark.model.ForkProcessLauncher;
 
-public final class JavaForkProcessLauncher
-	implements org.example.jpb.core.benchmark.model.ForkProcessLauncher {
+public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 
 	private static final long TERMINATION_GRACE_PERIOD_MILLIS = 5_000L;
 	private static final int MAX_STDERR_BYTES = 64 * 1024;
@@ -147,7 +148,7 @@ public final class JavaForkProcessLauncher
 		return ForkBenchmarkResult
 			.builder()
 			.forkIndex(request.getForkIndex())
-			.status(ForkBenchmarkStatus.FAILED)
+			.status(BenchmarkStatus.FAILED)
 			.errorMessage(errorMessage)
 			.build();
 	}

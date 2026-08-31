@@ -12,7 +12,7 @@ import org.example.jpb.annotation.Problem;
 import org.example.jpb.annotation.Solution;
 import org.example.jpb.core.benchmark.JavaForkProcessLauncher;
 import org.example.jpb.core.benchmark.JsonForkBenchmarkTransport;
-import org.example.jpb.core.benchmark.enums.ForkBenchmarkStatus;
+import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.core.benchmark.model.BenchmarkConfig;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkRequest;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkResult;
@@ -51,7 +51,7 @@ class JsonForkBenchmarkTransportTest {
 			.builder()
 			.forkIndex(0)
 			.problemId("two-sum")
-			.problemClassName("com.example.jpb.problems.TwoSumProblem")
+			.problemClassName("org.example.jpb.problems.TwoSumProblem")
 			.solutionId("hash-map")
 			.config(config)
 			.build();
@@ -88,7 +88,7 @@ class JsonForkBenchmarkTransportTest {
 
 		ForkBenchmarkResult result = launcher.launch(request);
 
-		assertEquals(ForkBenchmarkStatus.SUCCESS, result.getStatus());
+		assertEquals(BenchmarkStatus.SUCCESS, result.getStatus());
 		assertEquals(3, result.getForkIndex());
 		assertEquals(2, result.getStats().getSampleCount());
 	}
