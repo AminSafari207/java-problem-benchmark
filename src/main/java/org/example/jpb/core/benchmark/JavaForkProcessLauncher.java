@@ -3,6 +3,7 @@ package org.example.jpb.core.benchmark;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
@@ -10,6 +11,7 @@ import org.example.jpb.core.benchmark.model.ForkBenchmarkRequest;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkResult;
 import org.example.jpb.core.benchmark.model.ForkBenchmarkTransport;
 import org.example.jpb.core.benchmark.model.ForkProcessLauncher;
+import org.example.jpb.core.shared.model.SystemCommand;
 
 public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 
@@ -25,7 +27,16 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 	@Override
 	public ForkBenchmarkResult launch(ForkBenchmarkRequest request)
 		throws IOException {
-		Process process = new ProcessBuilder(buildCommand())
+		SystemCommand requestProcessCommand = request.getProcessBuilderCommand();
+		List<String> processCommand;
+
+		if (requestProcessCommand == null) {
+			processCommand = getDefaultProcessBuilderCommand();
+		} else {
+			processCommand = requestProcessCommand.getElements();
+		}
+
+		Process process = new ProcessBuilder(processCommand)
 			.redirectErrorStream(false)
 			.start();
 
@@ -86,7 +97,7 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		}
 	}
 
-	private List<String> buildCommand() {
+	private List<String> getDefaultProcessBuilderCommand() {
 		String javaExecutable = Path.of(
 			System.getProperty("java.home"),
 			"bin",

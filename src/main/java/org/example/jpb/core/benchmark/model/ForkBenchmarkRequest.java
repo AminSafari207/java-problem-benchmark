@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import org.example.jpb.core.shared.constants.ModelLimits;
+import org.example.jpb.core.shared.model.SystemCommand;
 import org.example.jpb.util.ModelChecks;
 
 @Value
@@ -15,6 +16,7 @@ public class ForkBenchmarkRequest {
 	private final String problemClassName;
 	private final String solutionId;
 	private final BenchmarkConfig config;
+	private final SystemCommand processBuilderCommand;
 
 	@Builder
 	@JsonCreator
@@ -23,7 +25,8 @@ public class ForkBenchmarkRequest {
 		@JsonProperty("problemId") String problemId,
 		@JsonProperty("problemClassName") String problemClassName,
 		@JsonProperty("solutionId") String solutionId,
-		@JsonProperty("config") BenchmarkConfig config
+		@JsonProperty("config") BenchmarkConfig config,
+		@JsonProperty("processBuilderCommand") SystemCommand processBuilderCommand
 	) {
 		this.forkIndex = ModelChecks.requireNonNegative(forkIndex, "forkIndex");
 		this.problemId = ModelChecks.requireNormalizedNonBlankLengthBetween(
@@ -43,5 +46,6 @@ public class ForkBenchmarkRequest {
 			"solutionId"
 		);
 		this.config = ModelChecks.requireNonNull(config, "config");
+		this.processBuilderCommand = processBuilderCommand;
 	}
 }
