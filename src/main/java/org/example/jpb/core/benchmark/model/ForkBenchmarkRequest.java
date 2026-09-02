@@ -2,13 +2,14 @@ package org.example.jpb.core.benchmark.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 import org.example.jpb.core.shared.constants.ModelLimits;
 import org.example.jpb.core.shared.model.SystemCommand;
 import org.example.jpb.util.ModelChecks;
 
-@Value
+@Getter
+@EqualsAndHashCode
+@ToString
 public class ForkBenchmarkRequest {
 
 	private final int forkIndex;

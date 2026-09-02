@@ -2,11 +2,15 @@ package org.example.jpb.core.benchmark.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.example.jpb.core.benchmark.enums.BenchmarkStatus;
 import org.example.jpb.util.ModelChecks;
 
 @Getter
+@EqualsAndHashCode
+@ToString
 public class ForkBenchmarkResult {
 
 	private final int forkIndex;
