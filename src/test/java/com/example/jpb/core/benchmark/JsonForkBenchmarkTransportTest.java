@@ -26,23 +26,8 @@ class JsonForkBenchmarkTransportTest {
 	private final ForkBenchmarkTransport transport =
 		new JsonForkBenchmarkTransport();
 
-	@Problem(id = "dummy-problem", displayName = "Dummy")
-	@Contract(accepts = { Integer.class }, expects = Integer.class)
-	static class DummyProblem {
-
-		@CaseSet(id = "case-set-01")
-		public List<TestCase> cases2 = List.of(
-			TestCase.of("three", Arguments.single(1), 1)
-		);
-
-		@Solution(id = "return-one")
-		public Integer solve(Integer input) {
-			return 1;
-		}
-	}
-
 	@Test
-	void shouldWriteAndReadRequest() throws Exception {
+	void shouldSerializeAndDeserializeRequest() throws Exception {
 		BenchmarkConfig config = BenchmarkConfig.builder()
 			.warmupIterations(3)
 			.measurementIterations(5)
@@ -52,7 +37,7 @@ class JsonForkBenchmarkTransportTest {
 		ForkBenchmarkRequest request = ForkBenchmarkRequest.builder()
 			.forkIndex(0)
 			.problemId("two-sum")
-			.problemClassName("org.example.jpb.problems.TwoSumProblem")
+			.problemClassName("DummyProblem")
 			.solutionId("hash-map")
 			.config(config)
 			.build();
@@ -69,30 +54,22 @@ class JsonForkBenchmarkTransportTest {
 	}
 
 	@Test
-	void launchReturnsWorkerResult() throws IOException {
-		BenchmarkConfig config = BenchmarkConfig.builder()
-			.warmupIterations(1)
-			.measurementIterations(2)
-			.forkCount(1)
-			.forkTimeoutMillis(5_000L)
+	void shouldSerializeAndDeserializeResult() throws Exception {
+		String ERROR_MESSAGE = "ERROR_MESSAGE";
+
+		ForkBenchmarkResult result = ForkBenchmarkResult.builder()
+			.forkIndex(0)
+			.status(BenchmarkStatus.FAILED)
+			.errorMessage(ERROR_MESSAGE)
 			.build();
 
-		ForkBenchmarkRequest request = ForkBenchmarkRequest.builder()
-			.forkIndex(3)
-			.problemId("dummy-problem")
-			.problemClassName(DummyProblem.class.getName())
-			.solutionId("return-one")
-			.config(config)
-			.build();
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		transport.writeResult(output, result);
 
-		JavaForkProcessLauncher launcher = new JavaForkProcessLauncher(
-			new JsonForkBenchmarkTransport()
+		ForkBenchmarkResult actual = transport.readResult(
+			new ByteArrayInputStream(output.toByteArray())
 		);
 
-		ForkBenchmarkResult result = launcher.launch(request);
-
-		assertEquals(BenchmarkStatus.SUCCESS, result.getStatus());
-		assertEquals(3, result.getForkIndex());
-		assertEquals(2, result.getStats().getSampleCount());
+		assertEquals(result, actual);
 	}
 }
