@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="hmac-transformer" pluginVersion="9.0.0">
+    <developerToolsConfigurations>
+      <developerToolConfiguration developerToolId="ascii-encoder-decoder" id="969da4f5-d2de-4ed3-8e5e-166735dfc20f" name="Workbench">
+        <properties>
+          <property key="sourceText" type="INPUT" value="kotlin.String|dasdsa" />
+          <property key="targetText" type="INPUT" value="kotlin.String|dasdsa" />
+        </properties>
+      </developerToolConfiguration>
+    </developerToolsConfigurations>
+    <expandedGroupNodeIds />
+  </component>
+</project>

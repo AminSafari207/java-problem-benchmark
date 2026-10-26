@@ -2,8 +2,10 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-node_modules/
 .kotlin
+node_modules/
+
+package-lock.json
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
