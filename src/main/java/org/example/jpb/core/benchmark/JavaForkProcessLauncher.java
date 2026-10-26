@@ -40,6 +40,14 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 			.redirectErrorStream(false)
 			.start();
 
+		ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+		Thread stdoutDrainer = startDrainer(
+			process.getInputStream(),
+			stdout,
+			Integer.MAX_VALUE,
+			"fork-stdout-" + request.getForkIndex()
+		);
+
 		ByteArrayOutputStream stderr = new ByteArrayOutputStream();
 		Thread stderrDrainer = startDrainer(
 			process.getErrorStream(),
@@ -58,7 +66,7 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 
 			if (!completed) {
 				destroyProcess(process);
-				joinQuietly(stderrDrainer);
+				joinDrainers(stdoutDrainer, stderrDrainer);
 
 				return failed(
 					request,
@@ -69,7 +77,7 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 				);
 			}
 
-			joinQuietly(stderrDrainer);
+			joinDrainers(stdoutDrainer, stderrDrainer);
 
 			if (process.exitValue() != 0) {
 				return failed(
@@ -81,10 +89,13 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 				);
 			}
 
-			return transport.readResult(process.getInputStream());
+			return transport.readResult(
+				new ByteArrayInputStream(stdout.toByteArray())
+			);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			destroyProcess(process);
+			joinDrainers(stdoutDrainer, stderrDrainer);
 
 			return failed(
 				request,
@@ -192,6 +203,12 @@ public final class JavaForkProcessLauncher implements ForkProcessLauncher {
 		String text = stderr.toString(StandardCharsets.UTF_8).trim();
 
 		return text.isEmpty() ? "<empty>" : text;
+	}
+
+	private void joinDrainers(Thread... drainers) {
+		for (Thread drainer : drainers) {
+			joinQuietly(drainer);
+		}
 	}
 
 	private void joinQuietly(Thread thread) {
