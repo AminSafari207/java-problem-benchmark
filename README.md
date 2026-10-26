@@ -5,7 +5,7 @@ This is a personal project. i'm trying to figure out what it would look like to 
 
 There are contract, case sets and solutions but in plain Java classes instead of scattering logic across a bunch of test files.
 
-It's not a finished library. it's closer to a framework experiment actually, because of annotation-driven problem definitions, a correctness-first runner, a basic benchmark pass, and some console output so I can actually see what the hell happened.
+It's not a finished library. it's closer to a framework experiment actually, because of annotation-driven problem definitions, a correctness-first runner, a benchmark pass that can run in-process or in isolated JVMs, and some console output so I can actually see what the hell happened.
 
 Requires:
 
@@ -28,9 +28,11 @@ The runner validates that everything lines up, executes each solution against ev
 ---
 ## Where things stand
 
-Right now it does correctness checking and a simple timing benchmark.
+Right now it does correctness checking and a timing benchmark.
 
 Correctness runs first. only solutions that pass every test case get benchmarked. if nothing passes, benchmark is skipped with a reason.
+
+Benchmarking can run in the current JVM with `forkCount(0)`, or in isolated JVM processes when `forkCount` is greater than zero. each fork runs the benchmark on its own, returns its samples, and the runner merges them into one result. that way one hot JVM doesn't get to lie to me about all the other runs.
 
 If you want more details like validation rules, the full pipeline and ..., it's all in [flow.md](docs/flow.md).
 
@@ -39,7 +41,7 @@ I kept the README short on purpose.
 ---
 ## Try it
 
-There's a dummy problem in the test suite and a real `TwoSumProblem` in `Main`. both run correctness + benchmark and print the results.
+There's a dummy problem in the test suite and a real `TwoSumProblem` in `App`. both run correctness + benchmark and print the results.
 
 Use:
 
@@ -47,7 +49,7 @@ Use:
 mvn test
 ```
 
-Or run `Main` directly:
+Or run `App` directly:
 
 ```bash
 mvn compile && java -cp target/classes org.example.jpb.App
@@ -97,6 +99,7 @@ And to run it yourself:
 BenchmarkConfig benchmarkConfig = BenchmarkConfig.builder()
         .warmupIterations(10_000)
         .measurementIterations(100_000)
+        .forkCount(0)
         .build();
 
 ProblemExecutor executor = new ProblemExecutor();
@@ -114,6 +117,8 @@ renderer.renderProblemResult(result.getProblemResult(), options);
 renderer.renderBenchmarkResult(result.getProblemBenchmarkResult(), options);
 ```
 
+`forkCount(0)` keeps the benchmark in the current JVM. anything above zero forks a separate JVM for each run, then merges the samples back together. the default is `5`, and each fork gets a `60_000` ms timeout by default. if a fork times out or exits badly, that solution's benchmark is marked as failed with the fork's stderr attached.
+
 And here you can see the current output:
 
 ![Example console output](assets/dummy-problem-output.png)
@@ -129,12 +134,12 @@ Signatures get checked against the contract before anything runs. if something d
 src/main/java/org/example/jpb/
   annotation/       markers: @Problem, @Contract, @CaseSet, @Solution, @Generator
   core/
-    benchmark/      BenchmarkRunner
-    constants/      ModelLimits
-    enums/          BenchmarkStatus
-    model/          contracts, prepared artifacts, result models, BenchmarkConfig
-    runner/         ProblemPreparator, ProblemRunner, ProblemExecutor
-  problems/         TwoSumProblem (example)
+    benchmark/      BenchmarkRunner, fork runner/worker/launcher, JSON transport
+    execution/      ProblemExecutor
+    preparation/    ProblemPreparator
+    runner/         ProblemRunner
+    shared/         constants and shared models (Arguments, TestCase, SystemCommand)
+  problems/         TwoSumProblem, DummyProblem
   render/
     console/        ProblemConsoleRenderer
     constants/      ConsoleLayout
@@ -142,43 +147,11 @@ src/main/java/org/example/jpb/
   util/             Console, ModelChecks, ReflectionExecutor, ResultComparator
 ```
 
-`Main.java` runs `TwoSumProblem` through the full pipeline and prints correctness + benchmark output.
+`App` runs `TwoSumProblem` through the full pipeline and prints correctness + benchmark output.
 
 No CLI yet. (is it really required tho?)
 
 ---
-## Roadmap
-
-Stuff that's working and i'm happy with:
-
-- [x] Annotation-based problem definitions
-- [x] `@Contract` on the problem class (`accepts` / `expects`)
-- [x] `@CaseSet` on methods and fields, single case or a list
-- [x] `@Solution` — run multiple implementations against the same cases
-- [x] Stable `id` + optional `displayName` on problems, case sets, solutions, and test cases
-- [x] Contract validation before execution
-- [x] `ResultComparator` that handles arrays and the usual equality cases
-- [x] Console renderer with pass/fail output and benchmark table
-- [x] Basic benchmarking: warmup, measurement iterations, min/avg/max timing
-- [x] `ProblemExecutor` that runs correctness first, then benchmarks passing solutions
-
-Stuff i still need to do:
-
-- [ ] Improve benchmark reliability:
-  - [ ] Batch timing
-  - [ ] Result sink / dead-code-elimination protection
-  - [ ] Better sample statistics
-  - [ ] Mutable input isolation
-  - [ ] Benchmark environment metadata
-  - [ ] JMH integration or export
-- [ ] `@Generator` — random case generation at runtime
-- [ ] Discovery and loading pipeline for `@Problem` classes:
-    - [ ] Load compiled classes from `.class` files
-    - [ ] Load problems from external `.jar` files
-    - [ ] Support raw `.java` source files via compilation + loading
-- [ ] Compile-time validation with annotation processors
-
-
 ## Notes
 
 This is a learning project first.

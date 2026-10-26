@@ -41,6 +41,15 @@ The system has five layers:
         |
         +-- BenchmarkRunner.run()  (or skip if none passed)
         |     |
+        |     +-- forkCount == 0 -> run in the current JVM
+        |     |
+        |     +-- forkCount > 0  -> run in separate JVMs
+        |           +-- ForkBenchmarkRunner
+        |           +-- JavaForkProcessLauncher
+        |           +-- ForkBenchmarkWorker
+        |           +-- JSON request/result over stdio
+        |           +-- merge samples from every fork
+        |     |
         |     v
         |   ProblemBenchmarkResult
         |
@@ -91,7 +100,7 @@ The problem class must declare exactly one `@Contract` annotation.
 - `accepts` — array of parameter types, in order
 - `expects` — return type
 
-During preparation, the annotation is read from the class and converted into a `ProblemContract` for validation.
+During preparation, the annotation is read from the class and converted into a `PreparedContract` for validation.
 
 ### Case set rules
 
@@ -113,12 +122,12 @@ Solutions are sorted by `id` before execution.
 
 Most model classes are immutable builder classes validated through `ModelChecks`. Lombok generates the boilerplate.
 
-### ProblemContract
+### PreparedContract
 
 Internal model built from `@Contract` during preparation:
 
 ```java
-ProblemContract.of(new Class<?>[] { Integer.class, String.class }, Boolean.class);
+PreparedContract.of(new Class<?>[] { Integer.class, String.class }, Boolean.class);
 ```
 
 Stores `Class<?>[] acceptedTypes` and `Class<?> expectedType`. Used only for validation at runtime; it does not perform any invocation itself.
@@ -137,7 +146,7 @@ Wraps the input values for a test case:
 - `Arguments.single(value)` -- one argument
 - `Arguments.of(first, rest...)` -- multiple arguments
 
-Values are cloned on access to prevent mutation.
+Values are cloned on access to prevent mutation. `deepValues()` clones primitive arrays and recursively clones object arrays.
 
 ### TestCase
 
@@ -170,6 +179,7 @@ PreparedProblem
   solutions: List<PreparedSolution>
     id, displayName
     solutionMethod
+    invoker
 ```
 
 `PreparedProblem.withNewSolutions(...)` creates a copy with a different solution list. `ProblemExecutor` uses this to benchmark only the solutions that passed correctness.
@@ -202,19 +212,27 @@ ProblemExecutionResult
     solutionBenchmarkResults: List<SolutionBenchmarkResult>
       solutionId, solutionDisplayName
       status: SUCCESS | FAILED
-      stats: BenchmarkStats (sampleCount, totalNanos, minNanos, maxNanos)
+      stats: BenchmarkStats
+        sampleCount, totalNanos, minNanos, maxNanos
+        medianNanos, p95Nanos, p99Nanos, samplesNanos
       errorMessage (on failure)
     skipReason (when benchmark was skipped)
 ```
 
 `BenchmarkStats.getAverageNanos()` is computed from `totalNanos / sampleCount`.
 
+For forked runs there is also an internal `ForkBenchmarkResult` per fork. it carries the fork index, status, stats, optional GC deltas, and an error message. those per-fork results are not exposed directly; `BenchmarkRunner` aggregates them into a regular `SolutionBenchmarkResult`.
+
 ### BenchmarkConfig
 
-Controls warmup and measurement:
+Controls warmup, measurement, and fork execution:
 
 - `warmupIterations` -- default 1,000, must be >= 0
 - `measurementIterations` -- default 10,000, must be > 0
+- `forkCount` -- default 5, must be between 0 and 10
+- `forkTimeoutMillis` -- default 60,000, must be between 1,000 and 600,000
+
+`forkCount(0)` means in-process benchmarking. any positive value forks that many JVM processes per solution.
 
 ---
 ## Execution guarantees and current assumptions
@@ -223,12 +241,14 @@ The framework currently assumes problem definitions are deterministic and that
 solution methods do not rely on external state.
 
 - Case sets and solutions are executed sequentially.
-- A single prepared problem instance is used during a run.
+- A single prepared problem instance is used during an in-process run.
 - Solutions should not mutate shared problem state.
 - Mutable case arguments are copied only for value types supported by
   `Arguments`.
 - Benchmark timing includes the current invocation path and test-case traversal.
   It does not yet isolate algorithm time from reflection or framework overhead.
+- Forked benchmarks isolate the JVM, but each fork still uses the same
+  reflection-based runner and case traversal.
 - Benchmark results are comparative and educational, not a replacement for JMH.
 
 ---
@@ -247,7 +267,7 @@ Creates an instance via the no-argument constructor (made accessible via reflect
 
 ### 3. Read contract
 
-Reads `@Contract` from the problem class and builds a `ProblemContract` from `accepts` and `expects`.
+Reads `@Contract` from the problem class and builds a `PreparedContract` from `accepts` and `expects`.
 
 ### 4. Collect case sets
 
@@ -259,7 +279,7 @@ Iterates declared methods and fields annotated with `@CaseSet`:
 
 ### 5. Collect solutions
 
-Finds all methods annotated with `@Solution`, makes them accessible, sorts by `id`.
+Finds all methods annotated with `@Solution`, makes them accessible, creates an invoker, and sorts by `id`.
 
 ### 6. Validate artifacts
 
@@ -314,12 +334,18 @@ solution at a time:
    Each repetition is one benchmark sample.
 
 3. **Statistics**  
-   Records total elapsed nanoseconds and derives minimum, maximum, and average
-   sample duration.
+   Records each sample's elapsed nanoseconds and derives sample count, total,
+   min, max, average, median, p95, and p99.
 
-4. **Failure handling**  
+4. **Fork aggregation**  
+   When `forkCount` is greater than zero, each fork runs its own warmup and
+   measurement, then the parent combines the samples from all successful forks
+   into one `BenchmarkStats`.
+
+5. **Failure handling**  
    An exception during warmup or measurement marks that solution benchmark as
-   `FAILED` and stores an error message.
+   `FAILED` and stores an error message. A failed or timed-out fork also fails
+   the whole solution benchmark.
 
 A measurement sample currently represents one full pass across all case sets and
 test cases for one solution. Timing is wall-clock elapsed time for that complete
@@ -328,12 +354,60 @@ workload.
 The current benchmark implementation is intentionally basic:
 
 - it uses `System.nanoTime()`;
-- it runs in-process;
+- it supports in-process and isolated JVM fork execution;
 - it includes framework overhead such as reflective invocation and traversal;
-- it does not yet use batch timing, result sinks, JVM forks, adaptive warmup,
-  percentile statistics, or process isolation;
+- it does not yet use batch timing, adaptive warmup, or environment metadata;
 - it is useful for learning and rough comparisons, not as a replacement for
   JMH.
+
+---
+## Fork benchmark pipeline
+
+Forked benchmarking exists to keep one JVM's warmup and allocation behavior from
+bleeding into the next run.
+
+When `forkCount > 0`, `BenchmarkRunner` delegates each solution to
+`ForkBenchmarkRunner`. That runner creates `forkCount` requests and runs them
+sequentially.
+
+Each request contains:
+
+- the fork index
+- problem id and problem class name
+- solution id
+- the full `BenchmarkConfig`
+- an optional `processBuilderCommand`
+
+`JavaForkProcessLauncher` turns a request into a process:
+
+1. Use the request's `processBuilderCommand` if present. otherwise build a
+   default command from the current `java.home`, `java.class.path`, and
+   `ForkBenchmarkWorker`.
+2. Start the process with stdout and stderr kept separate.
+3. Drain stderr up to 64 KiB and stdout without a cap on background threads.
+4. Write the JSON request to the process stdin, then close stdin.
+5. Wait for the process with `forkTimeoutMillis`. on timeout, destroy it and
+   return a failed result with whatever stderr was captured.
+6. Check the exit code, then deserialize the result from the buffered stdout.
+
+The stdout drain is not optional. without it the parent waits for the child to
+exit while the child is blocked writing a large result into a full OS pipe,
+which deadlocks both sides.
+
+`ForkBenchmarkWorker` runs in the child JVM:
+
+1. Read the JSON request from stdin.
+2. Load the problem class with `Class.forName`.
+3. Prepare the problem and find the solution by id.
+4. Run `BenchmarkRunner.runSingleSolutionInProcess` with `forkCount` forced to
+   zero.
+5. Write a `ForkBenchmarkResult` as JSON to stdout.
+
+Back in the parent, `BenchmarkRunner.aggregateForkResults` combines the raw
+samples from every successful fork. if any fork is missing, failed, or returns
+no samples, the solution's benchmark is marked failed and the fork error is
+preserved.
+
 ---
 ## Utilities
 
@@ -348,7 +422,7 @@ Central validation helpers used by model builders:
 
 ### ReflectionExecutor
 
-Centralizes reflective invocation. Unwraps `InvocationTargetException` so the original runtime exception or error propagates cleanly.
+Centralizes reflective invocation. Unwraps `InvocationTargetException` so the original runtime exception or error propagates cleanly. It also creates the `SolutionInvoker` used by the benchmark path.
 
 ### ResultComparator
 
@@ -386,9 +460,12 @@ ANSI-colored output helpers, box drawing, indentation, truncation, padding, and 
 
 - a boxed benchmark header
 - skipped message if benchmark was not run
-- a table with status, solution name, samples, avg/min/max timing
+- a table with status, solution name, samples, avg/min/p50/p95/p99/max timing
 - failed benchmark rows with truncated error messages
 - successful rows sorted by average time (fastest first)
+
+It does not care whether the stats came from one in-process run or ten forks.
+by the time the renderer sees them, the samples have already been merged.
 
 ### ConsoleRenderOptions
 
@@ -412,6 +489,7 @@ These are the natural places to add new behavior:
 | Random case generation | New collector in `ProblemPreparator` for `@Generator` methods |
 | Problem discovery | New scanner that finds `@Problem` classes on the classpath |
 | Richer benchmarking | Per-case timing, JVM warmup control, GC hints, or JMH integration in `BenchmarkRunner` |
+| Custom fork command | Set `processBuilderCommand` on `ForkBenchmarkRequest` |
 | New output formats | Additional renderers alongside `ProblemConsoleRenderer` |
 | Selective benchmarking | Filter which case sets or test cases feed into benchmark measurement |
 
@@ -424,6 +502,8 @@ This is intentional. When you are iterating on a problem definition, you want to
 
 Benchmark failures are softer: a thrown exception during warmup or measurement marks that solution as `FAILED` in the benchmark result instead of aborting the whole run.
 
+Fork failures are treated the same way. a timeout, non-zero exit, missing result, or broken JSON becomes a failed `ForkBenchmarkResult`, and the parent keeps going so the rest of the problem's solutions can still produce output.
+
 ---
 ## Current limitations
 
@@ -432,16 +512,20 @@ Benchmark failures are softer: a thrown exception during warmup or measurement m
   inherited members are ignored.
 - Correctness execution is sequential; bounded parallel execution is a future
   improvement.
-- The current benchmark is an in-process comparative timer, not a rigorous JVM
-  microbenchmark framework:
+- Forks are run sequentially, one process at a time.
+- The current benchmark is an in-process or forked comparative timer, not a
+  rigorous JVM microbenchmark framework:
     - reflective invocation and framework traversal are included in timing;
     - timing is per full test-case workload, not normalized `ns/op`;
-    - no result sink currently protects against all optimizer effects;
-    - no JVM forks, adaptive warmup, percentile reporting, or environment
-      metadata;
-    - mutable input isolation is limited to what `Arguments` can defensively copy.
+    - a static result sink keeps invocation results alive, but it is not a full
+      JMH-style blackhole;
+    - no adaptive warmup or environment metadata;
+    - mutable input isolation is limited to what `Arguments` can defensively
+      copy;
+    - forked results serialize every raw sample as JSON, so very large
+      measurement counts mean very large request/result payloads.
 - No problem discovery exists yet; callers pass problem classes explicitly.
 - Console alignment is ANSI-aware for the renderer's own styling, but does not
   fully support wide Unicode terminal characters.
 
-These are the gaps the roadmap in the README is meant to close.
+These are the gaps i'd like to close next.
